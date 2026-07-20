@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+.claude/settings.local.json
+.impeccable-review/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

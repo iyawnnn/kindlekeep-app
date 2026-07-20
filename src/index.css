@@ -1,26 +1,32 @@
 /* src/index.css */
+/* Radix Themes ships unlayered CSS (no @layer at all), which the cascade always ranks above
+   any @layer'd rule -- including every Tailwind utility -- regardless of import order or
+   specificity. That silently breaks things like `className="flex"` on a Radix <Box>: Radix's
+   own `.rt-Box { display: block }` wins over Tailwind's `.flex { display: flex }`. The fix is
+   to put Radix's layer ABOVE Tailwind's `base` (Preflight resets like `button { background:
+   transparent }`, which would otherwise strip Radix's own component skin -- e.g. it silently
+   turned solid blue buttons transparent) but BELOW `components`/`utilities`, so an explicit
+   Tailwind utility class in JSX can still deliberately override a Radix default. */
+@layer theme, base, radix, components, utilities;
 @import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&family=Righteous&family=Unbounded:wght@200..900&display=swap');
 @import "tailwindcss";
+@import "@radix-ui/themes/styles.css" layer(radix);
 
 @theme {
   --font-sans: "Onest", sans-serif;
   --font-heading: "Unbounded", sans-serif;
   --font-wordmark: "Righteous", system-ui;
 
-  --color-zinc-800: #27272A;
-  --color-zinc-900: #18181B;
-  --color-zinc-950: #09090B;
   --color-blue-500: #3B82F6;
-  --color-iris-400: #A78BFA;
 
   --animate-kindle-breathe: kindle-breathe 3s ease-in-out infinite;
 
   @keyframes kindle-breathe {
-    0%, 100% { box-shadow: 0 0 2px 0px rgba(59, 130, 246, 0.2); }
-    50% { box-shadow: 0 0 6px 2px rgba(59, 130, 246, 0.6); }
+    0%, 100% { box-shadow: 0 0 2px 0px rgba(59, 130, 246, 0.15); }
+    50% { box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.45); }
   }
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-100 font-sans;
+  @apply bg-white text-zinc-900 font-sans;
 }

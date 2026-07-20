@@ -21,7 +21,7 @@ export const AuthCallback = () => {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-zinc-400 font-mono">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center text-zinc-500 font-mono">
       <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" strokeWidth={1} />
       <p className="uppercase tracking-widest text-sm">Verifying Session State...</p>
     </div>

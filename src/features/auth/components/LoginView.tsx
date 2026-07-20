@@ -19,60 +19,60 @@ export const LoginView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 font-sans text-zinc-100">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 font-sans text-zinc-900">
       <div className="w-full max-w-sm">
         <KindleCard isActive={true} className="p-8">
           <div className="flex flex-col items-center mb-8 text-center">
-            <h1 className="font-wordmark text-4xl tracking-wide text-zinc-100 mb-2 lowercase">
+            <h1 className="font-wordmark text-4xl tracking-wide text-black mb-2 lowercase">
               kindlekeep
             </h1>
-            <h2 className="text-zinc-400 font-heading font-black text-sm uppercase tracking-widest">
+            <h2 className="text-zinc-500 font-heading font-black text-sm uppercase tracking-widest">
               Identity Hub
             </h2>
           </div>
 
           <div className="flex flex-col gap-4">
-            <Button 
-              size="3" 
-              variant="outline" 
-              color="gray" 
-              highContrast 
+            <Button
+              size="3"
+              variant="outline"
+              color="gray"
+              highContrast
               className="w-full cursor-pointer justify-start px-6 font-mono group"
               onClick={() => handleLogin('github')}
             >
-              <SiGithub 
-                className="mr-3 w-4 h-4 text-zinc-300 group-hover:text-zinc-100 transition-colors" 
-                style={iconWireframeStyle} 
+              <SiGithub
+                className="mr-3 w-4 h-4 text-zinc-500 group-hover:text-black transition-colors"
+                style={iconWireframeStyle}
               />
               Authenticate via GitHub
             </Button>
 
-            <Button 
-              size="3" 
-              variant="outline" 
-              color="gray" 
-              highContrast 
+            <Button
+              size="3"
+              variant="outline"
+              color="gray"
+              highContrast
               className="w-full cursor-pointer justify-start px-6 font-mono group"
               onClick={() => handleLogin('google')}
             >
-              <SiGoogle 
-                className="mr-3 w-4 h-4 text-zinc-300 group-hover:text-zinc-100 transition-colors" 
-                style={iconWireframeStyle} 
+              <SiGoogle
+                className="mr-3 w-4 h-4 text-zinc-500 group-hover:text-black transition-colors"
+                style={iconWireframeStyle}
               />
               Authenticate via Google
             </Button>
 
-            <Button 
-              size="3" 
-              variant="outline" 
-              color="gray" 
-              highContrast 
+            <Button
+              size="3"
+              variant="outline"
+              color="gray"
+              highContrast
               className="w-full cursor-pointer justify-start px-6 font-mono group"
               onClick={() => handleLogin('gitlab')}
             >
-              <SiGitlab 
-                className="mr-3 w-4 h-4 text-zinc-300 group-hover:text-zinc-100 transition-colors" 
-                style={iconWireframeStyle} 
+              <SiGitlab
+                className="mr-3 w-4 h-4 text-zinc-500 group-hover:text-black transition-colors"
+                style={iconWireframeStyle}
               />
               Authenticate via GitLab
             </Button>

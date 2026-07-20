@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-20T00:00:00Z",
+  "title": "Design System: kindlekeep",
+  "extensions": {
+    "colorMeta": {
+      "signal-blue": {
+        "role": "primary",
+        "displayName": "Signal Blue",
+        "canonical": "#3B82F6",
+        "tonalRamp": ["#DBEAFE", "#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E3A8A"]
+      },
+      "sentinel-ink": {
+        "role": "neutral",
+        "displayName": "Sentinel Ink",
+        "canonical": "#000000",
+        "tonalRamp": ["#FAFAFA", "#E4E4E7", "#D4D4D8", "#A1A1AA", "#71717A", "#52525B", "#27272A", "#000000"]
+      },
+      "status-success": { "role": "semantic", "displayName": "Success", "canonical": "#16A34A", "tonalRamp": ["#F0FDF4", "#BBF7D0", "#4ADE80", "#16A34A", "#166534"], "usageNote": "Transient action-confirmation toasts only (saved/reset/created). Monitor and security state 'all clear' uses Signal Blue, not green." },
+      "status-danger": { "role": "semantic", "displayName": "Danger", "canonical": "#DC2626", "tonalRamp": ["#FEF2F2", "#FECACA", "#F87171", "#DC2626", "#991B1B"] },
+      "status-warning": { "role": "semantic", "displayName": "Warning", "canonical": "#F59E0B", "tonalRamp": ["#FFFBEB", "#FDE68A", "#FBBF24", "#F59E0B", "#B45309"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page-level titles only (Command Center, Sentinel Vault)." },
+      "headline": { "displayName": "Headline", "purpose": "Section and card titles." },
+      "body": { "displayName": "Body", "purpose": "Default reading text, descriptions, form labels." },
+      "label": { "displayName": "Label", "purpose": "Status badges, metadata tags, uppercase micro-labels." },
+      "wordmark": { "displayName": "Wordmark", "purpose": "The kindlekeep mark only, always lowercase, never reused elsewhere." }
+    },
+    "shadows": [
+      { "name": "resting", "value": "0 1px 2px 0 rgba(0,0,0,0.05)", "purpose": "Default card/panel elevation, paired with a 1px zinc-200 border." },
+      { "name": "interactive-hover", "value": "0 4px 6px -1px rgba(0,0,0,0.1)", "purpose": "Cards/panels on hover to signal responsiveness." },
+      { "name": "kindle-breathe-glow", "value": "0 0 2px rgba(59,130,246,0.15) to 0 0 8px rgba(59,130,246,0.45), 3s ease-in-out infinite", "purpose": "Signature pulse reserved exclusively for active, healthy monitor cards." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default ease-out-quint for state transitions and card entrances." },
+      { "name": "duration-fast", "value": "150ms", "purpose": "Hover/press feedback." },
+      { "name": "duration-standard", "value": "250ms", "purpose": "State changes, toasts, modal open/close." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single most important action on a screen (Save, Submit, Initialize) — solid Signal Blue.",
+      "html": "<button class=\"ds-btn-primary\">Save Configuration</button>",
+      "css": ".ds-btn-primary { background: #3B82F6; color: #FFFFFF; padding: 12px 24px; border: none; border-radius: 0; font-family: Onest, sans-serif; font-weight: 500; cursor: pointer; transition: background 150ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-primary:hover { background: #2563EB; } .ds-btn-primary:focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; } .ds-btn-primary:active { background: #1D4ED8; }"
+    },
+    {
+      "name": "Inverted Button",
+      "kind": "button",
+      "refersTo": "button-inverted",
+      "description": "The highest-commitment CTA on a page (landing SCAN, account creation, config export) — solid black, the boldest element present.",
+      "html": "<button class=\"ds-btn-inverted\">SCAN</button>",
+      "css": ".ds-btn-inverted { background: #000000; color: #FFFFFF; padding: 16px 32px; border: none; border-radius: 0; font-family: Onest, sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; cursor: pointer; transition: background 150ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-inverted:hover { background: #27272A; } .ds-btn-inverted:focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Hairline-first elevation: a 1px zinc border does the primary work, shadow is a light touch.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Production Gateway</h3><p class=\"ds-card-body\">api.example.com</p></div>",
+      "css": ".ds-card { background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 0; padding: 20px; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: box-shadow 150ms cubic-bezier(0.16,1,0.3,1); } .ds-card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); } .ds-card-title { font-family: Unbounded, sans-serif; font-weight: 700; font-size: 1rem; color: #18181B; margin: 0 0 4px; } .ds-card-body { font-family: Onest, sans-serif; font-size: 0.875rem; color: #71717A; margin: 0; }"
+    },
+    {
+      "name": "Grade Badge",
+      "kind": "chip",
+      "refersTo": "badge-grade",
+      "description": "Bordered box (not a pill), background tinted toward the semantic color, text in full-strength color. Pairs color with a letter, never color alone.",
+      "html": "<div class=\"ds-badge-grade\">A</div>",
+      "css": ".ds-badge-grade { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid rgba(59,130,246,0.3); background: #EFF6FF; color: #2563EB; font-family: Unbounded, sans-serif; font-weight: 900; font-size: 1.25rem; border-radius: 0; }"
+    },
+    {
+      "name": "Nav Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Active/current-page state gets a visible Signal Blue indicator, not just a color shift on hover — per the Committed color strategy.",
+      "html": "<a href=\"#\" class=\"ds-nav-link ds-nav-link--active\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"0\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg><span>Vault</span></a>",
+      "css": ".ds-nav-link { display: inline-flex; align-items: center; gap: 8px; color: #71717A; font-family: Onest, sans-serif; font-size: 0.875rem; font-weight: 500; text-decoration: none; padding: 8px 4px; border-bottom: 2px solid transparent; transition: color 150ms cubic-bezier(0.16,1,0.3,1), border-color 150ms cubic-bezier(0.16,1,0.3,1); } .ds-nav-link:hover { color: #000000; } .ds-nav-link--active { color: #3B82F6; border-bottom-color: #3B82F6; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Sentinel Console",
+    "overview": "A command post that watches quietly and speaks precisely when something matters. kindlekeep monitors real infrastructure for developers who can't afford, or don't want, to pay for security visibility. The interface reflects that job: white and near-black by default, calm and unremarkable at rest, until Signal Blue marks the thing that needs attention. Nothing here is decorative; every color, weight, and border earns its place because it's doing work, not because it looks good in isolation. The system explicitly rejects the generic AI-dashboard look: a correct but invisible accent color that technically exists in the CSS but reads as absent at a glance, gray-on-gray monotony, ungrounded pastel or cream neutrals, decorative gradients or glassmorphism, and side-stripe colored borders standing in for real design decisions.",
+    "keyCharacteristics": [
+      "White base, near-black ink, one committed blue — no secondary accent color",
+      "Sharp corners everywhere; nothing is rounded",
+      "Dense, task-first layouts; this is a console, not a pitch",
+      "Signal Blue is felt, not just technically present — solid fills and active-state color, not just borders and hover states"
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Signal Blue is the only accent color in the system. There is no secondary or tertiary brand color; anything that isn't blue, ink, white, zinc, or a semantic status color doesn't belong.", "section": "colors" },
+      { "name": "The Felt, Not Filed Rule", "body": "An accent color that's technically in the CSS but never shows up as a solid fill, an active-state background, or a real visual moment has failed its job.", "section": "colors" },
+      { "name": "The One Family Per Role Rule", "body": "Unbounded is for headings and nothing else; Onest is for body and nothing else. Never swap them for variety within a single view.", "section": "typography" },
+      { "name": "The Border-First Rule", "body": "Depth comes from a hairline border first, shadow second. A card with no border and only a shadow reads as unfinished in this system.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Signal Blue (#3B82F6) as solid fills on primary actions and active states, not just as a border or hover color.",
+      "Do keep every corner sharp (0px radius), system-wide.",
+      "Do pair every status/grade color with an icon or label; never rely on color alone.",
+      "Do use a 1px zinc-200 border before reaching for shadow to convey a card's edge.",
+      "Do reserve the kindle-breathe glow exclusively for actively-monitored, healthy targets."
+    ],
+    "donts": [
+      "Don't let Signal Blue exist only in hover states or thin borders.",
+      "Don't use border-left/border-right greater than 1px as a colored accent stripe.",
+      "Don't put gray text on a colored/tinted background.",
+      "Don't introduce a second accent color.",
+      "Don't reach for cream, sand, or warm-tinted neutrals for warmth.",
+      "Don't add gradients, glassmorphism, or decorative blur anywhere in the system."
+    ]
+  }
+}

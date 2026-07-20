@@ -6,6 +6,7 @@ export interface SecurityAuditResponse {
   sslIssuer: string | null;
   sslExpiryAt: string | null;
   rawHeaders: string | null;
+  tlsVersion: string | null;
 }
 
 export interface UptimeLogResponse {

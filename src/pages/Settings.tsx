@@ -42,7 +42,9 @@ export const Settings = () => {
   });
 
   useEffect(() => {
+    // Seed the editable form fields once the server settings load; setState is intentional.
     if (settings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDiscordWebhookUrl(settings.discordWebhookUrl || '');
       setEnableEmailNotifications(settings.enableEmailNotifications);
     }
@@ -67,30 +69,30 @@ export const Settings = () => {
   const usagePercentage = usage ? (usage.currentMonitors / usage.monitorLimit) * 100 : 0;
 
   return (
-    <Box className="max-w-3xl mx-auto py-10 px-6 font-satoshi">
-      <Text className="font-unbounded font-bold text-3xl text-zinc-50 block mb-8">
+    <Box className="max-w-3xl mx-auto py-10 px-6 font-onest">
+      <Text className="font-unbounded font-bold text-3xl text-black block mb-8">
         Identity Hub
       </Text>
 
-      <Box className="bg-zinc-900 border border-zinc-800 p-6 mb-8" style={{ borderRadius: 0 }}>
-        <Text className="font-unbounded font-bold text-xl text-zinc-50 block mb-4">
+      <Box className="bg-white border border-zinc-200 shadow-sm p-6 mb-8" style={{ borderRadius: 0 }}>
+        <Text className="font-unbounded font-bold text-xl text-zinc-900 block mb-4">
           Budget Shield
         </Text>
         {usageLoading ? (
-          <Text className="text-zinc-400 font-onest">Evaluating quotas...</Text>
+          <Text className="text-zinc-500 font-onest">Evaluating quotas...</Text>
         ) : usage ? (
           <Box>
             <Flex justify="between" mb="2">
-              <Text className="text-zinc-300 font-onest">
+              <Text className="text-zinc-700 font-onest">
                 {usage.currentMonitors} of {usage.monitorLimit} monitors utilized
               </Text>
-              <Text className="text-zinc-400 font-onest">
+              <Text className="text-zinc-500 font-onest">
                 {usagePercentage.toFixed(0)}%
               </Text>
             </Flex>
-            <Progress 
-              value={usagePercentage} 
-              className="h-2 bg-zinc-800" 
+            <Progress
+              value={usagePercentage}
+              className="h-2 bg-zinc-200"
               style={{ borderRadius: 0 }}
               color={usagePercentage >= 100 ? "red" : "blue"}
             />
@@ -98,38 +100,38 @@ export const Settings = () => {
         ) : null}
       </Box>
 
-      <Box className="bg-zinc-900 border border-zinc-800 p-6 mb-8" style={{ borderRadius: 0 }}>
-        <Text className="font-unbounded font-bold text-xl text-zinc-50 block mb-6">
+      <Box className="bg-white border border-zinc-200 shadow-sm p-6 mb-8" style={{ borderRadius: 0 }}>
+        <Text className="font-unbounded font-bold text-xl text-zinc-900 block mb-6">
           Notification Routing
         </Text>
 
         {settingsLoading ? (
-          <Text className="text-zinc-400 font-onest">Loading configuration...</Text>
+          <Text className="text-zinc-500 font-onest">Loading configuration...</Text>
         ) : (
           <Flex direction="column" gap="5">
             <Box>
-              <Text className="text-zinc-300 font-onest block mb-2">
+              <Text className="text-zinc-700 font-onest block mb-2">
                 Discord Webhook URL
               </Text>
-              <TextField.Root 
-                placeholder="https://discord.com/api/webhooks/..." 
+              <TextField.Root
+                placeholder="https://discord.com/api/webhooks/..."
                 value={discordWebhookUrl}
                 onChange={(e) => setDiscordWebhookUrl(e.target.value)}
-                className="font-onest bg-zinc-950 border-zinc-800 text-zinc-50"
+                className="font-onest bg-white border-zinc-300 text-zinc-900"
                 style={{ borderRadius: 0 }}
               />
             </Box>
 
-            <Flex align="center" justify="between" className="pt-4 border-t border-zinc-800">
+            <Flex align="center" justify="between" className="pt-4 border-t border-zinc-200">
               <Box>
-                <Text className="text-zinc-50 font-onest block">
+                <Text className="text-zinc-900 font-onest block">
                   Resend Daily Digest
                 </Text>
-                <Text size="2" className="text-zinc-400 font-onest">
+                <Text size="2" className="text-zinc-500 font-onest">
                   Receive critical infrastructure updates via email.
                 </Text>
               </Box>
-              <Switch 
+              <Switch
                 checked={enableEmailNotifications}
                 onCheckedChange={setEnableEmailNotifications}
                 color="blue"
@@ -141,12 +143,12 @@ export const Settings = () => {
 
       <Flex justify="between" align="center">
          <Text size="2" className="text-zinc-500 font-onest">
-           Maintained by <a href="https://iansebastian.dev" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline inline-flex items-center gap-1 transition-colors"><Rocket size={12} /> iansebastian.dev</a>
+           Maintained by <a href="https://iansebastian.dev" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1 transition-colors"><Rocket size={12} /> iansebastian.dev</a>
          </Text>
-        <Button 
+        <Button
           onClick={handleSave}
           disabled={updateSettings.isPending || settingsLoading}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-onest cursor-pointer px-6"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-onest cursor-pointer px-6 transition-colors duration-150"
           style={{ borderRadius: 0 }}
         >
           {updateSettings.isPending ? 'Synchronizing...' : 'Save Configuration'}

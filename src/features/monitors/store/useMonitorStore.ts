@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { api } from '../../../lib/axios';
+import { useToastStore } from '../../../components/ui/useToastStore';
 
 export enum UptimeStatus {
   Healthy = 0,
@@ -55,6 +56,7 @@ export const useMonitorStore = create<MonitorStore>((set, get) => ({
     } catch (error) {
       set({ monitors: previousMonitors });
       console.error('Failed to toggle monitor state', error);
+      useToastStore.getState().error('Failed to update monitor state.');
     }
   },
 
@@ -70,6 +72,7 @@ export const useMonitorStore = create<MonitorStore>((set, get) => ({
     } catch (error) {
       set({ monitors: previousMonitors });
       console.error('Failed to delete monitor', error);
+      useToastStore.getState().error('Failed to delete monitor.');
     }
   }
 }));

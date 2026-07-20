@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { HubConnectionBuilder, HubConnection, LogLevel, HubConnectionState } from '@microsoft/signalr';
+import { HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr';
 import { useMonitorStore } from '../store/useMonitorStore';
 
 interface UseSignalROptions {
@@ -8,7 +8,6 @@ interface UseSignalROptions {
 }
 
 export const useSignalR = (token: string | null, options?: UseSignalROptions) => {
-  const connectionRef = useRef<HubConnection | null>(null);
   const startPromiseRef = useRef<Promise<void> | null>(null);
   
   useEffect(() => {
@@ -23,8 +22,6 @@ export const useSignalR = (token: string | null, options?: UseSignalROptions) =>
       .configureLogging(LogLevel.Warning)
       .withAutomaticReconnect()
       .build();
-
-    connectionRef.current = connection;
 
     connection.on('ReceivePulse', (update) => {
       useMonitorStore.setState((state) => ({
@@ -48,13 +45,16 @@ export const useSignalR = (token: string | null, options?: UseSignalROptions) =>
         startPromiseRef.current = connection.start();
         await startPromiseRef.current;
         
-        // Subscription Logic: Only invoke after connection is established
-        if (options?.monitorId && connection.state === HubConnectionState.Connected) {
+        // Subscription Logic: Only invoke after connection is established.
+        // The early-return guard above narrows connection.state to Disconnected;
+        // start() has since changed it, so cast to re-widen for this check.
+        if (options?.monitorId && (connection.state as HubConnectionState) === HubConnectionState.Connected) {
           await connection.invoke('SubscribeToMonitor', options.monitorId);
         }
-      } catch (error: any) {
-        if (error.name === 'AbortError' || error.message?.includes('stopped during negotiation')) {
-          return; 
+      } catch (error) {
+        const err = error as { name?: string; message?: string };
+        if (err.name === 'AbortError' || err.message?.includes('stopped during negotiation')) {
+          return;
         }
         console.warn('SignalR connection failed:', error);
       } finally {
@@ -73,7 +73,7 @@ export const useSignalR = (token: string | null, options?: UseSignalROptions) =>
 
         if (connection.state === HubConnectionState.Connected) {
           if (options?.monitorId) {
-            await connection.invoke('UnsubscribeFromMonitor', options.monitorId).catch(() => {});
+            await connection.invoke('UnsubscribeFromMonitor', options.monitorId).catch((err) => console.warn('SignalR unsubscribe failed on cleanup:', err));
           }
         }
         
@@ -85,6 +85,4 @@ export const useSignalR = (token: string | null, options?: UseSignalROptions) =>
       stopConnection();
     };
   }, [token, options?.monitorId, options?.onLog]);
-
-  return connectionRef.current;
 };

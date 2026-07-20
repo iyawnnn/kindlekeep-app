@@ -1,5 +1,5 @@
 // src/components/ui/KindleCard.tsx
-import { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
 interface KindleCardProps extends ComponentProps<typeof motion.div> {
@@ -11,14 +11,14 @@ const springConfig = {
   type: "spring",
   stiffness: 300,
   damping: 25
-};
+} as const;
 
 export const KindleCard = ({ isActive, children, className = '', ...props }: KindleCardProps) => {
   return (
     <motion.div
       layout
       transition={springConfig}
-      className={`relative flex flex-col p-5 bg-zinc-900 border border-zinc-800 rounded-none ${isActive ? 'animate-kindle-breathe' : 'opacity-50'} ${className}`}
+      className={`relative flex flex-col p-5 bg-white border border-zinc-200 shadow-sm hover:shadow-md transition-shadow duration-150 rounded-none ${isActive ? 'animate-kindle-breathe' : 'opacity-50'} ${className}`}
       {...props}
     >
       {children}

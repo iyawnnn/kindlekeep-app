@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@radix-ui/themes';
 import { App } from './App';
-import '@radix-ui/themes/styles.css';
+import { Toaster } from './components/ui/Toaster';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -17,10 +17,11 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Theme appearance="dark" accentColor="blue" radius="none">
+    <Theme appearance="light" accentColor="blue" radius="none">
       <QueryClientProvider client={queryClient}>
-        <div style={{ fontFamily: 'Instrument Sans, sans-serif' }}>
+        <div>
           <App />
+          <Toaster />
         </div>
       </QueryClientProvider>
     </Theme>

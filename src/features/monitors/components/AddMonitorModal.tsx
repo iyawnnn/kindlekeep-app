@@ -75,20 +75,20 @@ export const AddMonitorModal = () => {
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content 
-        className="bg-zinc-900 border border-zinc-800 !rounded-none"
+      <Dialog.Content
+        className="bg-white border border-zinc-200 !rounded-none"
         style={{ maxWidth: 450 }}
       >
-        <Dialog.Title className="font-heading font-black text-xl text-zinc-100 mb-2">
+        <Dialog.Title className="font-heading font-black text-xl text-zinc-900 mb-2">
           Deploy Target
         </Dialog.Title>
-        <Dialog.Description className="font-sans text-zinc-400 text-sm mb-6">
+        <Dialog.Description className="font-sans text-zinc-500 text-sm mb-6">
           Register a new endpoint for high-frequency telemetry and security audits.
         </Dialog.Description>
 
         <Flex direction="column" gap="4">
           <label>
-            <Text as="div" size="2" mb="2" className="font-sans text-zinc-300 font-bold text-xs uppercase tracking-widest">
+            <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
               Target URL
             </Text>
             <TextField.Root 
@@ -103,7 +103,7 @@ export const AddMonitorModal = () => {
           </label>
 
           <label>
-            <Text as="div" size="2" mb="2" className="font-sans text-zinc-300 font-bold text-xs uppercase tracking-widest">
+            <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
               Friendly Name
             </Text>
             <TextField.Root 

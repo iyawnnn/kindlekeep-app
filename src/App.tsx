@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, NavLink, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Flex, Text, Box } from '@radix-ui/themes';
 import { Settings as SettingsIcon, ShieldAlert, Lock } from 'lucide-react';
 import { useEffect } from 'react';
@@ -38,27 +38,48 @@ const AuthCallbackRoute = () => {
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => (
-  <Box className="min-h-screen bg-zinc-950 font-onest text-zinc-50">
-    <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md sticky top-0 z-50">
+  <Box className="min-h-screen bg-white font-onest text-zinc-900">
+    <header className="border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <Flex align="center" justify="between" className="max-w-7xl mx-auto px-6 h-16">
         <Link to="/dashboard">
-          <Text className="font-righteous text-xl text-zinc-50 tracking-tight lowercase">
+          <Text className="font-wordmark text-xl text-black tracking-tight lowercase">
             kindlekeep
           </Text>
         </Link>
         <nav className="flex items-center gap-6">
-          <Link to="/vault" className="text-zinc-400 hover:text-zinc-50 transition-colors flex items-center gap-2">
+          <NavLink
+            to="/vault"
+            className={({ isActive }) =>
+              `flex items-center gap-2 py-2 border-b-2 transition-colors ${
+                isActive ? 'text-blue-600 border-blue-500' : 'text-zinc-500 border-transparent hover:text-black'
+              }`
+            }
+          >
             <Lock size={18} strokeWidth={1} />
             <span className="text-sm font-medium font-onest">Vault</span>
-          </Link>
-          <Link to="/incidents" className="text-zinc-400 hover:text-zinc-50 transition-colors flex items-center gap-2">
+          </NavLink>
+          <NavLink
+            to="/incidents"
+            className={({ isActive }) =>
+              `flex items-center gap-2 py-2 border-b-2 transition-colors ${
+                isActive ? 'text-blue-600 border-blue-500' : 'text-zinc-500 border-transparent hover:text-black'
+              }`
+            }
+          >
             <ShieldAlert size={18} strokeWidth={1} />
             <span className="text-sm font-medium font-onest">Incidents</span>
-          </Link>
-          <Link to="/settings" className="text-zinc-400 hover:text-zinc-50 transition-colors flex items-center gap-2">
+          </NavLink>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              `flex items-center gap-2 py-2 border-b-2 transition-colors ${
+                isActive ? 'text-blue-600 border-blue-500' : 'text-zinc-500 border-transparent hover:text-black'
+              }`
+            }
+          >
             <SettingsIcon size={18} strokeWidth={1} />
             <span className="text-sm font-medium font-onest">Settings</span>
-          </Link>
+          </NavLink>
         </nav>
       </Flex>
     </header>
