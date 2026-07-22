@@ -55,7 +55,8 @@ export const AddMonitorModal = () => {
       setFriendlyName('');
     } catch (err) {
       console.error('Failed to create monitor payload:', err);
-      setError('Failed to deploy monitor. Verify the endpoint and try again.');
+      const detail = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      setError(detail || 'Failed to deploy monitor. Verify the endpoint and try again.');
     } finally {
       setIsLoading(false);
     }

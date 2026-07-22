@@ -1,21 +1,36 @@
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Box, Flex, Text, Code, Button, Tooltip } from '@radix-ui/themes';
-import { ArrowLeft, ShieldCheck, ShieldAlert, Copy, Activity } from 'lucide-react';
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Box, Flex, Text, Code, Button, Tooltip, Switch } from '@radix-ui/themes';
+import { ArrowLeft, ShieldCheck, ShieldAlert, Copy, Activity, Pencil, Check } from 'lucide-react';
+import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { api } from '../lib/axios';
 import { UptimeStatus } from '../features/monitors/store/useMonitorStore';
-import type { SecurityAuditResponse, UptimeLogResponse } from '../features/monitors/types/monitor.types';
+import type { SecurityAuditResponse, UptimeLogResponse, MonitorDetailResponse, PublicStatusResponse } from '../features/monitors/types/monitor.types';
 import { useSignalR } from '../features/monitors/hooks/useSignalR';
+import { useToastStore } from '../components/ui/useToastStore';
+import { EditMonitorModal } from '../features/monitors/components/EditMonitorModal';
 import '@xterm/xterm/css/xterm.css';
 
 export const MonitorDetail = () => {
   const { id } = useParams<{ id: string }>();
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermInstance = useRef<Terminal | null>(null);
-  
+  const queryClient = useQueryClient();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isTogglingPublic, setIsTogglingPublic] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const { data: monitor } = useQuery<MonitorDetailResponse>({
+    queryKey: ['monitor', id],
+    queryFn: async () => {
+      const response = await api.get(`/api/monitors/${id}`);
+      return response.data;
+    },
+    enabled: !!id,
+  });
+
   const { data: history, isLoading: historyLoading } = useQuery<UptimeLogResponse[]>({
     queryKey: ['monitorHistory', id],
     queryFn: async () => {
@@ -25,6 +40,26 @@ export const MonitorDetail = () => {
     enabled: !!id,
     refetchInterval: 60000,
   });
+
+  const handleTogglePublic = async (enabled: boolean) => {
+    if (!id) return;
+    setIsTogglingPublic(true);
+    try {
+      await api.patch<PublicStatusResponse>(`/api/monitors/${id}/public-status`, { enabled });
+      queryClient.invalidateQueries({ queryKey: ['monitor', id] });
+    } catch {
+      useToastStore.getState().error('Failed to update public status page.');
+    } finally {
+      setIsTogglingPublic(false);
+    }
+  };
+
+  const copyPublicLink = async () => {
+    if (!monitor?.publicSlug) return;
+    await navigator.clipboard.writeText(`${window.location.origin}/status/${monitor.publicSlug}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const { data: audit, isLoading: auditLoading } = useQuery<SecurityAuditResponse>({
     queryKey: ['securityAudit', id],
@@ -150,6 +185,42 @@ export const MonitorDetail = () => {
         <ArrowLeft size={16} />
         <span>Return to Command Center</span>
       </Link>
+
+      {monitor && (
+        <Box className="bg-white border border-zinc-200 shadow-sm p-8 mb-8" style={{ borderRadius: 0 }}>
+          <Flex align="center" justify="between" mb="4">
+            <Box>
+              <Text className="font-unbounded font-bold text-2xl text-zinc-900 block">{monitor.friendlyName}</Text>
+              <Text className="font-mono text-sm text-zinc-500">{monitor.url}</Text>
+            </Box>
+            <Button variant="outline" color="gray" className="cursor-pointer font-mono" onClick={() => setIsEditOpen(true)}>
+              <Pencil size={14} /> Edit
+            </Button>
+          </Flex>
+
+          <Flex align="center" justify="between" className="p-4 border border-zinc-200 bg-zinc-50">
+            <Box>
+              <Text size="2" className="font-bold text-zinc-900 block">Public Status Page</Text>
+              <Text size="2" className="text-zinc-500">Share a read-only uptime page, no login required.</Text>
+            </Box>
+            <Flex align="center" gap="3">
+              {monitor.isPublic && monitor.publicSlug && (
+                <Button variant="ghost" className="cursor-pointer font-mono text-zinc-600" onClick={copyPublicLink}>
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? 'Copied' : `/status/${monitor.publicSlug}`}
+                </Button>
+              )}
+              <Switch
+                checked={monitor.isPublic}
+                disabled={isTogglingPublic}
+                onCheckedChange={handleTogglePublic}
+              />
+            </Flex>
+          </Flex>
+        </Box>
+      )}
+
+      <EditMonitorModal monitorId={id ?? ''} isOpen={isEditOpen} onOpenChange={setIsEditOpen} />
 
       <Box className="bg-white border border-zinc-200 shadow-sm p-8 mb-8" style={{ borderRadius: 0 }}>
         <Text className="font-unbounded font-bold text-2xl text-zinc-900 block mb-6">Protocol Timeline</Text>

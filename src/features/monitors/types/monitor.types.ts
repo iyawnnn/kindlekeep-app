@@ -14,3 +14,39 @@ export interface UptimeLogResponse {
   status: number;
   latencyMs: number;
 }
+
+export interface MonitorDetailResponse {
+  id: string;
+  url: string;
+  friendlyName: string;
+  intervalMinutes: number;
+  requestTimeout: number;
+  requestHeaders: Record<string, string> | null;
+  currentUptimeStatus: number;
+  currentSecurityGrade: string;
+  isActive: boolean;
+  isPublic: boolean;
+  publicSlug: string | null;
+}
+
+export interface UpdateMonitorRequest {
+  url: string;
+  friendlyName: string;
+  intervalMinutes: number;
+  requestTimeout: number;
+  requestHeaders: Record<string, string> | null;
+}
+
+export interface PublicStatusResponse {
+  isPublic: boolean;
+  publicSlug: string | null;
+}
+
+export interface PublicMonitorResponse {
+  friendlyName: string;
+  url: string;
+  currentUptimeStatus: number;
+  isActive: boolean;
+  updatedAt: string;
+  history: UptimeLogResponse[];
+}

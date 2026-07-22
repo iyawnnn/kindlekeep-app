@@ -23,6 +23,7 @@ export interface MonitorResponse {
 interface MonitorStore {
   monitors: MonitorResponse[];
   setMonitors: (monitors: MonitorResponse[]) => void;
+  updateMonitorInList: (id: string, patch: Partial<MonitorResponse>) => void;
   toggleMonitor: (id: string) => Promise<void>;
   deleteMonitor: (id: string) => Promise<void>;
   resetCircuit: (id: string) => Promise<void>;
@@ -31,7 +32,12 @@ interface MonitorStore {
 export const useMonitorStore = create<MonitorStore>((set, get) => ({
   monitors: [],
   setMonitors: (monitors) => set({ monitors }),
-  
+
+  updateMonitorInList: (id, patch) => set({
+    monitors: get().monitors.map((m) => (m.id === id ? { ...m, ...patch } : m))
+  }),
+
+
   resetCircuit: async (id: string) => {
     try {
       await api.post(`/api/monitors/${id}/reset-circuit`);

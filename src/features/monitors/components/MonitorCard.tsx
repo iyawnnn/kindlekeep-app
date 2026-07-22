@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Activity, Shield, Globe, Power, Trash2, RotateCcw } from "lucide-react";
+import { Activity, Shield, Globe, Power, Trash2, RotateCcw, Pencil } from "lucide-react";
 import { AlertDialog, Button, Flex } from "@radix-ui/themes";
 import {
   type MonitorResponse,
@@ -9,6 +9,7 @@ import {
 import { KindleCard } from "../../../components/ui/KindleCard";
 import { useToastStore } from "../../../components/ui/useToastStore";
 import { SecurityDetailsModal } from "./SecurityDetailsModal";
+import { EditMonitorModal } from "./EditMonitorModal";
 
 interface MonitorCardProps {
   monitor: MonitorResponse;
@@ -16,6 +17,7 @@ interface MonitorCardProps {
 
 export const MonitorCard = ({ monitor }: MonitorCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const { toggleMonitor, deleteMonitor, resetCircuit } = useMonitorStore();
 
@@ -38,6 +40,11 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditOpen(true);
   };
 
   const handleReset = async (e: React.MouseEvent) => {
@@ -139,6 +146,13 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
                 </button>
               )}
 
+              <button
+                onClick={handleEdit}
+                className="text-zinc-400 hover:text-zinc-900 transition-colors"
+              >
+                <Pencil size={16} />
+              </button>
+
               <AlertDialog.Root>
                 <AlertDialog.Trigger>
                   <button
@@ -203,6 +217,12 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
           onOpenChange={setIsModalOpen}
         />
       )}
+
+      <EditMonitorModal
+        monitorId={monitor.id}
+        isOpen={isEditOpen}
+        onOpenChange={setIsEditOpen}
+      />
     </>
   );
 };
