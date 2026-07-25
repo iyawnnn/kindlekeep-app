@@ -21,3 +21,16 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+// A 401 means the JWT is missing/expired/invalid - clear it and bounce to the landing page, matching
+// ProtectedRoute's own "no token -> /" redirect, instead of leaving the dashboard silently broken.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && localStorage.getItem('jwt_token')) {
+      localStorage.removeItem('jwt_token');
+      window.location.assign('/');
+    }
+    return Promise.reject(error);
+  }
+);

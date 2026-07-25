@@ -21,6 +21,7 @@ export const MonitorDetail = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [badgeCopied, setBadgeCopied] = useState(false);
 
   const { data: monitor } = useQuery<MonitorDetailResponse>({
     queryKey: ['monitor', id],
@@ -59,6 +60,15 @@ export const MonitorDetail = () => {
     await navigator.clipboard.writeText(`${window.location.origin}/status/${monitor.publicSlug}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyBadgeMarkdown = async () => {
+    if (!monitor?.publicSlug) return;
+    const badgeUrl = `${api.defaults.baseURL}/api/public/monitors/${monitor.publicSlug}/badge.svg`;
+    const statusUrl = `${window.location.origin}/status/${monitor.publicSlug}`;
+    await navigator.clipboard.writeText(`[![kindlekeep](${badgeUrl})](${statusUrl})`);
+    setBadgeCopied(true);
+    setTimeout(() => setBadgeCopied(false), 2000);
   };
 
   const { data: audit, isLoading: auditLoading } = useQuery<SecurityAuditResponse>({
@@ -205,10 +215,16 @@ export const MonitorDetail = () => {
             </Box>
             <Flex align="center" gap="3">
               {monitor.isPublic && monitor.publicSlug && (
-                <Button variant="ghost" className="cursor-pointer font-mono text-zinc-600" onClick={copyPublicLink}>
-                  {copied ? <Check size={14} /> : <Copy size={14} />}
-                  {copied ? 'Copied' : `/status/${monitor.publicSlug}`}
-                </Button>
+                <>
+                  <Button variant="ghost" className="cursor-pointer font-mono text-zinc-600" onClick={copyPublicLink}>
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copied ? 'Copied' : `/status/${monitor.publicSlug}`}
+                  </Button>
+                  <Button variant="ghost" className="cursor-pointer font-mono text-zinc-600" onClick={copyBadgeMarkdown}>
+                    {badgeCopied ? <Check size={14} /> : <Copy size={14} />}
+                    {badgeCopied ? 'Copied' : 'README badge'}
+                  </Button>
+                </>
               )}
               <Switch
                 checked={monitor.isPublic}

@@ -7,6 +7,8 @@ export interface SecurityAuditResponse {
   sslExpiryAt: string | null;
   rawHeaders: string | null;
   tlsVersion: string | null;
+  detectedPlatform: string | null;
+  remediationSnippet: string | null;
 }
 
 export interface UptimeLogResponse {

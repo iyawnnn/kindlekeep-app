@@ -2,12 +2,13 @@ import { Box, Flex, Text } from '@radix-ui/themes';
 import { SiGithub, SiGoogle, SiGitlab } from 'react-icons/si';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { api } from '../lib/axios';
 
 export const Login = () => {
   const shouldReduceMotion = useReducedMotion();
 
   const handleLogin = (provider: string) => {
-    window.location.href = `http://localhost:5247/api/auth/login/${provider}`;
+    window.location.href = `${api.defaults.baseURL}/api/auth/login/${provider}`;
   };
 
   return (
