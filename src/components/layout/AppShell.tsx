@@ -1,38 +1,37 @@
 // src/components/layout/AppShell.tsx
-import { useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { Box, Flex, Text } from '@radix-ui/themes';
-import { Menu } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { Sidebar } from './Sidebar';
+import { SiteHeader } from './SiteHeader';
+import { CommandPalette } from './CommandPalette';
 
 export const AppShell = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
-    <Box className="min-h-screen bg-white font-onest text-zinc-900 flex">
-      <Sidebar mobileOpen={mobileOpen} onMobileOpenChange={setMobileOpen} />
-      <Flex direction="column" className="flex-1 min-w-0">
-        <div className="lg:hidden sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur-md">
-          <Flex align="center" justify="between" className="px-4 h-14">
-            <button
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              className="p-2 -ml-2 text-zinc-700 cursor-pointer"
-            >
-              <Menu size={20} strokeWidth={1} />
-            </button>
-            <Link to="/dashboard">
-              <Text className="font-wordmark text-lg text-black tracking-tight lowercase">
-                kindlekeep
-              </Text>
-            </Link>
-            <div className="w-9" />
-          </Flex>
-        </div>
-        <main className="flex-1 min-w-0">
-          <Outlet />
-        </main>
-      </Flex>
-    </Box>
+    <SidebarProvider className="flex flex-col">
+      <SiteHeader onSearchClick={() => setPaletteOpen(true)} />
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <div className="flex flex-1">
+        <Sidebar />
+        <SidebarInset>
+          <main className="flex-1 min-w-0">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };

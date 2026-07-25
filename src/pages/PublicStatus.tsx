@@ -1,7 +1,7 @@
 // src/pages/PublicStatus.tsx
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Flex, Text, Tooltip } from '@radix-ui/themes';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Globe } from 'lucide-react';
 import { useMemo } from 'react';
 import { api } from '../lib/axios';
@@ -29,46 +29,47 @@ export const PublicStatus = () => {
 
   if (isLoading) {
     return (
-      <Flex align="center" justify="center" className="min-h-screen bg-white">
-        <Text className="text-zinc-500 font-onest">Loading status...</Text>
-      </Flex>
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <p className="text-zinc-500">Loading status...</p>
+      </div>
     );
   }
 
   if (error || !monitor) {
     return (
-      <Flex align="center" justify="center" className="min-h-screen bg-white">
-        <Text className="text-zinc-500 font-onest">This status page is unavailable.</Text>
-      </Flex>
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <p className="text-zinc-500">This status page is unavailable.</p>
+      </div>
     );
   }
 
   const isHealthy = monitor.isActive && monitor.currentUptimeStatus === UptimeStatus.Healthy;
 
   return (
-    <Box className="min-h-screen bg-white font-onest">
-      <Box className="max-w-3xl mx-auto py-16 px-6">
-        <Flex align="center" gap="2" mb="8">
-          <Text className="font-wordmark text-xl text-black tracking-tight lowercase">kindlekeep</Text>
-        </Flex>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-3xl mx-auto py-16 px-6">
+        <div className="flex items-center gap-2 mb-8">
+          <img src="/logo.png" alt="" className="size-7 rounded-md" />
+          <span className="text-xl font-semibold text-black tracking-tight lowercase">kindlekeep</span>
+        </div>
 
-        <Flex align="center" justify="between" className="p-8 border border-zinc-200 mb-6" style={{ borderRadius: 0 }}>
-          <Flex align="center" gap="3">
-            <Globe strokeWidth={1} className={`w-6 h-6 ${isHealthy ? 'text-blue-500' : 'text-zinc-400'}`} />
-            <Text className="font-unbounded font-bold text-2xl text-zinc-900">{monitor.friendlyName}</Text>
-          </Flex>
-          <Text className={`text-sm uppercase tracking-widest font-bold ${isHealthy ? 'text-blue-600' : 'text-red-600'}`}>
+        <div className="flex items-center justify-between rounded-xl p-8 border border-zinc-200 mb-6">
+          <div className="flex items-center gap-3">
+            <Globe strokeWidth={1.5} className={`w-6 h-6 ${isHealthy ? 'text-primary' : 'text-zinc-400'}`} />
+            <p className="text-2xl font-semibold text-zinc-900">{monitor.friendlyName}</p>
+          </div>
+          <span className={`text-sm font-semibold ${isHealthy ? 'text-primary' : 'text-red-600'}`}>
             {monitor.isActive ? (isHealthy ? 'Operational' : 'Down') : 'Paused'}
-          </Text>
-        </Flex>
+          </span>
+        </div>
 
-        <Box className="bg-white border border-zinc-200 p-8" style={{ borderRadius: 0 }}>
-          <Text className="font-unbounded font-bold text-lg text-zinc-900 block mb-6">Uptime History</Text>
-          <Flex gap="1" className="w-full h-16 items-end">
+        <div className="rounded-xl bg-white border border-zinc-200 p-8">
+          <p className="text-lg font-semibold text-zinc-900 mb-6">Uptime History</p>
+          <div className="flex gap-1 w-full h-16 items-end">
             {paddedHistory.map((log, index) => {
               let colorClass = 'bg-zinc-200';
               if (log) {
-                colorClass = log.status === UptimeStatus.Healthy ? 'bg-blue-500' : 'bg-red-500';
+                colorClass = log.status === UptimeStatus.Healthy ? 'bg-primary' : 'bg-red-500';
               }
 
               const tooltipContent = log
@@ -76,18 +77,21 @@ export const PublicStatus = () => {
                 : 'No data';
 
               return (
-                <Tooltip key={index} content={<Text className="font-mono" size="2">{tooltipContent}</Text>}>
-                  <Box className={`flex-1 ${colorClass}`} style={{ height: '100%' }} />
+                <Tooltip key={index}>
+                  <TooltipTrigger asChild>
+                    <div className={`flex-1 rounded-sm ${colorClass}`} style={{ height: '100%' }} />
+                  </TooltipTrigger>
+                  <TooltipContent className="font-mono">{tooltipContent}</TooltipContent>
                 </Tooltip>
               );
             })}
-          </Flex>
-          <Flex justify="between" mt="3">
-            <Text size="2" className="text-zinc-500 font-mono">24 Hours Ago</Text>
-            <Text size="2" className="text-zinc-500 font-mono">Now</Text>
-          </Flex>
-        </Box>
-      </Box>
-    </Box>
+          </div>
+          <div className="flex justify-between mt-3">
+            <span className="text-sm text-zinc-500 font-mono">24 hours ago</span>
+            <span className="text-sm text-zinc-500 font-mono">Now</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

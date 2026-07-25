@@ -1,12 +1,23 @@
 import { useState } from "react";
 import { Activity, Shield, Globe, Power, Trash2, RotateCcw, Pencil } from "lucide-react";
-import { AlertDialog, Button, Flex } from "@radix-ui/themes";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   type MonitorResponse,
   UptimeStatus,
   useMonitorStore,
 } from "../store/useMonitorStore";
 import { KindleCard } from "../../../components/ui/KindleCard";
+import { getGradeColor } from "../lib/gradeColor";
 import { useToastStore } from "../../../components/ui/useToastStore";
 import { SecurityDetailsModal } from "./SecurityDetailsModal";
 import { EditMonitorModal } from "./EditMonitorModal";
@@ -24,11 +35,11 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
   const isQuarantined = monitor.currentUptimeStatus === UptimeStatus.Quarantined;
 
   const statusColorClass = isQuarantined
-    ? "text-red-600 font-unbounded"
+    ? "text-red-600"
     : !monitor.isActive
       ? "text-zinc-500"
       : monitor.currentUptimeStatus === UptimeStatus.Healthy
-        ? "text-blue-600"
+        ? "text-primary"
         : monitor.currentUptimeStatus === UptimeStatus.Down
           ? "text-red-600"
           : "text-amber-600"; // Degraded
@@ -74,21 +85,21 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
       >
         <KindleCard
           isActive={monitor.isActive && !isQuarantined}
-          className={isQuarantined ? "border-zinc-300 !animate-none" : ""}
+          className={isQuarantined ? "border-zinc-300" : ""}
         >
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
               <Globe
-                strokeWidth={1}
-                className={`w-5 h-5 ${monitor.isActive && !isQuarantined ? "text-blue-500" : "text-zinc-400"}`}
+                strokeWidth={1.5}
+                className={`w-5 h-5 ${monitor.isActive && !isQuarantined ? "text-primary" : "text-zinc-400"}`}
               />
-              <h3 className="font-heading font-bold text-sm truncate w-48 text-zinc-900">
+              <h3 className="font-semibold text-sm truncate w-48 text-zinc-900">
                 {monitor.friendlyName}
               </h3>
             </div>
-            <span className={`text-xs uppercase tracking-widest font-bold font-sans ${statusColorClass}`}>
+            <span className={`text-xs font-semibold tracking-wide ${statusColorClass}`}>
               {isQuarantined
-                ? "QUARANTINED"
+                ? "Quarantined"
                 : monitor.isActive
                   ? UptimeStatus[monitor.currentUptimeStatus]
                   : "Hibernating"}
@@ -102,7 +113,7 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
           <div className="flex items-center justify-between mt-auto">
             <div className="flex items-center gap-4 text-zinc-700">
               <div className="flex items-center gap-2">
-                <Activity strokeWidth={1} className="w-4 h-4 text-zinc-400" />
+                <Activity strokeWidth={1.5} className="w-4 h-4 text-zinc-400" />
                 <span className="text-sm font-mono">
                   {monitor.latencyMs != null && monitor.isActive && !isQuarantined
                     ? `${monitor.latencyMs}ms`
@@ -110,11 +121,11 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Shield strokeWidth={1} className="w-4 h-4 text-zinc-400" />
+                <Shield strokeWidth={1.5} className="w-4 h-4 text-zinc-400" />
                 <span
                   className={`text-sm font-bold font-mono ${
-                    monitor.currentSecurityGrade === "A" && monitor.isActive && !isQuarantined
-                      ? "text-blue-600"
+                    monitor.isActive && !isQuarantined
+                      ? getGradeColor(monitor.currentSecurityGrade).textClass
                       : "text-zinc-900"
                   }`}
                 >
@@ -126,11 +137,11 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
             <div className="flex items-center gap-2">
               {isQuarantined && (
                 <Button
-                  size="1"
+                  size="sm"
                   variant="outline"
                   onClick={handleReset}
                   disabled={isResetting}
-                  className="bg-white border-zinc-300 text-zinc-500 hover:text-zinc-900 font-onest rounded-none h-7 px-2 cursor-pointer transition-colors flex items-center gap-1"
+                  className="h-7 px-2 gap-1"
                 >
                   <RotateCcw size={12} className={isResetting ? "animate-spin" : ""} />
                   {isResetting ? "Resetting..." : "Reset Circuit"}
@@ -153,57 +164,34 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
                 <Pencil size={16} />
               </button>
 
-              <AlertDialog.Root>
-                <AlertDialog.Trigger>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
                   <button
                     onClick={handleDelete}
                     className="text-zinc-400 hover:text-red-600 transition-colors"
                   >
                     <Trash2 size={16} />
                   </button>
-                </AlertDialog.Trigger>
-                <AlertDialog.Content
-                  className="bg-white border border-zinc-200"
-                  style={{ borderRadius: 0 }}
-                  maxWidth="450px"
-                >
-                  <AlertDialog.Title className="text-zinc-900 font-unbounded font-bold">
-                    Delete Monitor
-                  </AlertDialog.Title>
-                  <AlertDialog.Description
-                    size="2"
-                    className="text-zinc-600 font-onest mb-4"
-                  >
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>Delete Monitor</AlertDialogTitle>
+                  <AlertDialogDescription>
                     Are you sure you want to delete{" "}
-                    <strong>{monitor.friendlyName}</strong>? All telemetry logs
+                    <strong className="text-zinc-900">{monitor.friendlyName}</strong>? All telemetry logs
                     and security audits associated with this monitor will be
                     permanently removed.
-                  </AlertDialog.Description>
-
-                  <Flex gap="3" justify="end">
-                    <AlertDialog.Cancel>
-                      <Button
-                        variant="soft"
-                        className="bg-zinc-100 text-zinc-900 font-onest cursor-pointer"
-                        style={{ borderRadius: 0 }}
-                      >
-                        Cancel
-                      </Button>
-                    </AlertDialog.Cancel>
-                    <AlertDialog.Action>
-                      <Button
-                        variant="solid"
-                        color="red"
-                        className="bg-red-600 text-white font-onest cursor-pointer"
-                        style={{ borderRadius: 0 }}
-                        onClick={confirmDelete}
-                      >
-                        Delete
-                      </Button>
-                    </AlertDialog.Action>
-                  </Flex>
-                </AlertDialog.Content>
-              </AlertDialog.Root>
+                  </AlertDialogDescription>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-600 text-white hover:bg-red-700"
+                      onClick={confirmDelete}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </KindleCard>

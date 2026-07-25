@@ -1,7 +1,17 @@
 // src/features/monitors/components/EditMonitorModal.tsx
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Dialog, Button, TextField, Text, Flex } from '@radix-ui/themes';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Loader2, Plus, X } from 'lucide-react';
 import { api } from '../../../lib/axios';
 import { useMonitorStore } from '../store/useMonitorStore';
@@ -15,7 +25,7 @@ interface EditMonitorModalProps {
 }
 
 export const EditMonitorModal = ({ monitorId, isOpen, onOpenChange }: EditMonitorModalProps) => {
-  const { data: monitor, isLoading } = useQuery<MonitorDetailResponse>({
+  const { data: monitor, isLoading, isError, refetch } = useQuery<MonitorDetailResponse>({
     queryKey: ['monitor', monitorId],
     queryFn: async () => {
       const response = await api.get(`/api/monitors/${monitorId}`);
@@ -25,29 +35,33 @@ export const EditMonitorModal = ({ monitorId, isOpen, onOpenChange }: EditMonito
   });
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
-      <Dialog.Content
-        className="bg-white border border-zinc-200 !rounded-none"
-        style={{ maxWidth: 480 }}
-      >
-        <Dialog.Title className="font-heading font-black text-xl text-zinc-900 mb-2">
-          Edit Target
-        </Dialog.Title>
-        <Dialog.Description className="font-sans text-zinc-500 text-sm mb-6">
-          Update endpoint configuration, polling cadence, and authenticated-request headers.
-        </Dialog.Description>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle>Edit monitor</DialogTitle>
+          <DialogDescription>
+            Update endpoint configuration, polling cadence, and authenticated-request headers.
+          </DialogDescription>
+        </DialogHeader>
 
-        {isLoading || !monitor ? (
-          <Flex align="center" justify="center" className="h-48 text-zinc-500">
-            <Loader2 strokeWidth={1} className="w-5 h-5 animate-spin" />
-          </Flex>
+        {isError ? (
+          <div className="flex flex-col items-center justify-center gap-3 h-48 text-center">
+            <p className="text-sm text-red-600">Failed to load this monitor.</p>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : isLoading || !monitor ? (
+          <div className="flex items-center justify-center h-48 text-zinc-500">
+            <Loader2 className="w-5 h-5 animate-spin" />
+          </div>
         ) : (
           // Keyed by monitor id so switching targets while the dialog is open always remounts with
           // fresh initial state, rather than syncing server data into local state via an effect.
           <EditMonitorForm key={monitor.id} monitor={monitor} monitorId={monitorId} onOpenChange={onOpenChange} />
         )}
-      </Dialog.Content>
-    </Dialog.Root>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -131,130 +145,94 @@ const EditMonitorForm = ({ monitor, monitorId, onOpenChange }: EditMonitorFormPr
 
   return (
     <>
-      <Flex direction="column" gap="4">
-        <label>
-          <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
-            Target URL
-          </Text>
-          <TextField.Root
-            size="3"
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-monitor-url">Target URL</Label>
+          <Input
+            id="edit-monitor-url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             className="font-mono text-sm"
-            variant="surface"
-            color="gray"
           />
-        </label>
+        </div>
 
-        <label>
-          <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
-            Friendly Name
-          </Text>
-          <TextField.Root
-            size="3"
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-monitor-name">Friendly Name</Label>
+          <Input
+            id="edit-monitor-name"
             value={friendlyName}
             onChange={(e) => setFriendlyName(e.target.value)}
-            className="font-sans text-sm"
-            variant="surface"
-            color="gray"
           />
-        </label>
+        </div>
 
-        <Flex gap="4">
-          <label className="flex-1">
-            <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
-              Interval (min)
-            </Text>
-            <TextField.Root
-              size="3"
+        <div className="flex gap-4">
+          <div className="flex-1 flex flex-col gap-2">
+            <Label htmlFor="edit-monitor-interval">Interval (min)</Label>
+            <Input
+              id="edit-monitor-interval"
               type="number"
               min={1}
               value={intervalMinutes}
               onChange={(e) => setIntervalMinutes(Number(e.target.value))}
               className="font-mono text-sm"
-              variant="surface"
-              color="gray"
             />
-          </label>
-          <label className="flex-1">
-            <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
-              Timeout (sec)
-            </Text>
-            <TextField.Root
-              size="3"
+          </div>
+          <div className="flex-1 flex flex-col gap-2">
+            <Label htmlFor="edit-monitor-timeout">Timeout (sec)</Label>
+            <Input
+              id="edit-monitor-timeout"
               type="number"
               min={1}
               max={60}
               value={requestTimeout}
               onChange={(e) => setRequestTimeout(Number(e.target.value))}
               className="font-mono text-sm"
-              variant="surface"
-              color="gray"
             />
-          </label>
-        </Flex>
+          </div>
+        </div>
 
         <div>
-          <Flex align="center" justify="between" mb="2">
-            <Text as="div" size="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
-              Custom Headers
-            </Text>
-            <Button size="1" variant="ghost" onClick={addHeaderRow} className="cursor-pointer">
+          <div className="flex items-center justify-between mb-2">
+            <Label>Custom Headers</Label>
+            <Button size="sm" variant="ghost" onClick={addHeaderRow} className="cursor-pointer">
               <Plus size={14} /> Add
             </Button>
-          </Flex>
-          <Flex direction="column" gap="2">
+          </div>
+          <div className="flex flex-col gap-2">
             {headers.map((h, i) => (
-              <Flex key={i} gap="2" align="center">
-                <TextField.Root
-                  size="2"
+              <div key={i} className="flex gap-2 items-center">
+                <Input
                   placeholder="Authorization"
                   value={h.key}
                   onChange={(e) => updateHeaderRow(i, 'key', e.target.value)}
                   className="font-mono text-xs flex-1"
-                  variant="surface"
-                  color="gray"
                 />
-                <TextField.Root
-                  size="2"
+                <Input
                   placeholder="Bearer ..."
                   value={h.value}
                   onChange={(e) => updateHeaderRow(i, 'value', e.target.value)}
                   className="font-mono text-xs flex-1"
-                  variant="surface"
-                  color="gray"
                 />
                 <button onClick={() => removeHeaderRow(i)} className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer">
                   <X size={16} />
                 </button>
-              </Flex>
+              </div>
             ))}
-          </Flex>
+          </div>
         </div>
 
-        {error && (
-          <Text color="red" size="2" className="font-sans text-sm mt-2">
-            {error}
-          </Text>
-        )}
-      </Flex>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+      </div>
 
-      <Flex gap="3" mt="6" justify="end">
-        <Dialog.Close>
-          <Button variant="outline" color="gray" className="cursor-pointer font-mono">
-            Cancel
-          </Button>
-        </Dialog.Close>
-        <Button
-          onClick={handleSubmit}
-          disabled={isSaving}
-          color="blue"
-          className="cursor-pointer font-mono"
-        >
-          {isSaving ? <Loader2 strokeWidth={1} className="w-4 h-4 animate-spin mr-2" /> : null}
+      <DialogFooter>
+        <Button variant="outline" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit} disabled={isSaving}>
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
-      </Flex>
+      </DialogFooter>
     </>
   );
 };

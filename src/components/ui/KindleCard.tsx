@@ -18,7 +18,7 @@ export const KindleCard = ({ isActive, children, className = '', ...props }: Kin
     <motion.div
       layout
       transition={springConfig}
-      className={`relative flex flex-col p-5 bg-white border border-zinc-200 shadow-sm hover:shadow-md transition-shadow duration-150 rounded-none ${isActive ? 'animate-kindle-breathe' : 'opacity-50'} ${className}`}
+      className={`relative flex flex-col p-5 bg-white border border-zinc-200 shadow-sm hover:shadow-md transition-shadow duration-150 rounded-xl ${isActive ? '' : 'opacity-50'} ${className}`}
       {...props}
     >
       {children}

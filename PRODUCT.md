@@ -22,7 +22,7 @@ A $0 budget should not mean a $0 security posture — real security auditing, fr
 
 ## Brand Personality
 
-Crisp, minimal, and confident — precise rather than decorative. Blue is a deliberate, felt identity color (not a token accent buried in hover states), carried with the same restraint and confidence as Linear's interface: dense information presented calmly, sharp typography, no wasted ornament.
+Crisp, minimal, and confident — precise rather than decorative. The structure matches linear.app's product conventions (soft rounded corners, Mercury White / Nordic Gray neutrals, self-hosted Inter Variable typeface, hairline-first elevation), but the brand color is kindlekeep's own: **Signal Blue (#3B82F6)**, matched pixel-for-pixel to the product logo, not Linear's. Signal Blue is a deliberate, felt identity color (not a token accent buried in hover states), carried with the same restraint and confidence as Linear's interface: dense information presented calmly on a white surface, soft rounded structure, no wasted ornament.
 
 ## Anti-references
 
@@ -30,7 +30,7 @@ Generic AI-dashboard flatness: a "correct" but invisible accent color that techn
 
 ## Design Principles
 
-Blue means something and shows up where it's earned — primary actions, active state, key signal — not scattered as decoration. Dense, task-first layouts over spacious marketing-style whitespace; this is a tool, not a pitch. Sharp corners and hairline structure over soft, rounded, "friendly" defaults. Every screen should read as deliberately composed, not templated. Motion explains a state change; it never exists for its own sake.
+Signal Blue means something and shows up where it's earned — primary actions, active state, key signal — not scattered as decoration. Dense, task-first layouts over spacious marketing-style whitespace; this is a tool, not a pitch. Soft rounded corners (Linear-style, not pill-shaped) and hairline structure over sharp edges or heavy shadows. Every screen should read as deliberately composed, not templated. Motion explains a state change; it never exists for its own sake — no idle-state decorative animation.
 
 ## Accessibility & Inclusion
 

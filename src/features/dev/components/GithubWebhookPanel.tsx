@@ -1,7 +1,8 @@
 // src/features/dev/components/GithubWebhookPanel.tsx
 import { useState } from 'react';
-import { Box, Button, Flex, Select, Text, Code } from '@radix-ui/themes';
-import { Copy, Check, Webhook } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CopyField } from '@/components/ui/CopyField';
+import { Webhook } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../../lib/axios';
 import type { MonitorResponse } from '../../monitors/store/useMonitorStore';
@@ -9,28 +10,6 @@ import type { MonitorResponse } from '../../monitors/store/useMonitorStore';
 interface WebhookSecretResponse {
   secret: string;
 }
-
-const CopyField = ({ label, value }: { label: string; value: string }) => {
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <Box>
-      <Text size="1" className="uppercase tracking-wider font-bold text-zinc-500 font-onest block mb-1">{label}</Text>
-      <Flex align="center" justify="between" gap="3" className="bg-zinc-50 border border-zinc-200 p-3">
-        <Code variant="ghost" className="text-zinc-700 font-mono text-sm break-all">{value}</Code>
-        <Button variant="ghost" className="cursor-pointer text-zinc-500 shrink-0" onClick={copy}>
-          {copied ? <Check size={16} /> : <Copy size={16} />}
-        </Button>
-      </Flex>
-    </Box>
-  );
-};
 
 export const GithubWebhookPanel = () => {
   const [monitorId, setMonitorId] = useState<string | null>(null);
@@ -54,39 +33,41 @@ export const GithubWebhookPanel = () => {
   const webhookUrl = monitorId ? `${api.defaults.baseURL}/api/webhooks/github/${monitorId}` : null;
 
   return (
-    <Box className="bg-white border border-zinc-200 shadow-sm p-6" style={{ borderRadius: 0 }}>
-      <Flex align="center" gap="3" className="mb-6">
-        <Webhook className="w-5 h-5 text-blue-500" strokeWidth={1} />
-        <Text className="font-unbounded font-bold text-xl text-zinc-900">GitHub Webhook</Text>
-      </Flex>
+    <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Webhook className="w-5 h-5 text-primary" strokeWidth={1.5} />
+        <p className="text-xl font-semibold text-zinc-900">GitHub Webhook</p>
+      </div>
 
-      <Text size="2" className="text-zinc-500 font-onest block mb-4">
+      <p className="text-sm text-zinc-500 mb-4">
         Trigger an immediate audit whenever you push or deploy, instead of waiting for the next scheduled check.
-      </Text>
+      </p>
 
-      <Flex direction="column" gap="4">
-        <Box>
-          <Text size="1" className="uppercase tracking-wider font-bold text-zinc-500 font-onest block mb-1">Monitor</Text>
-          <Select.Root value={monitorId ?? undefined} onValueChange={setMonitorId}>
-            <Select.Trigger placeholder="Select a monitor..." style={{ borderRadius: 0 }} className="w-full font-onest" />
-            <Select.Content style={{ borderRadius: 0 }}>
+      <div className="flex flex-col gap-4">
+        <div>
+          <label className="text-xs uppercase tracking-wider font-semibold text-zinc-500 block mb-1">Monitor</label>
+          <Select value={monitorId ?? undefined} onValueChange={setMonitorId}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a monitor..." />
+            </SelectTrigger>
+            <SelectContent>
               {monitors?.map((m) => (
-                <Select.Item key={m.id} value={m.id}>{m.friendlyName}</Select.Item>
+                <SelectItem key={m.id} value={m.id}>{m.friendlyName}</SelectItem>
               ))}
-            </Select.Content>
-          </Select.Root>
-        </Box>
+            </SelectContent>
+          </Select>
+        </div>
 
         {webhookUrl && <CopyField label="Webhook URL" value={webhookUrl} />}
         {webhookSecret && <CopyField label="Webhook Secret" value={webhookSecret.secret} />}
 
         {monitorId && (
-          <Text size="1" className="text-zinc-500 font-onest">
+          <p className="text-xs text-zinc-500">
             In your GitHub repo: Settings → Webhooks → Add webhook. Paste the URL as the Payload URL, the secret
             as the Secret, content type <strong>application/json</strong>, and trigger on <strong>push</strong> events.
-          </Text>
+          </p>
         )}
-      </Flex>
-    </Box>
+      </div>
+    </div>
   );
 };

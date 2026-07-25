@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Box, Flex, Text, TextField, Switch, Button, Progress } from '@radix-ui/themes';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Rocket } from 'lucide-react';
 import { api } from '../lib/axios';
@@ -25,7 +28,7 @@ interface UpdateSettingsRequest {
 
 export const Settings = () => {
   const queryClient = useQueryClient();
-  
+
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState('');
   const [enableEmailNotifications, setEnableEmailNotifications] = useState(true);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
@@ -79,120 +82,110 @@ export const Settings = () => {
   const usagePercentage = usage ? (usage.currentMonitors / usage.monitorLimit) * 100 : 0;
 
   return (
-    <Box className="max-w-3xl mx-auto py-10 px-6 font-onest">
-      <Text className="font-unbounded font-bold text-3xl text-black block mb-8">
+    <div className="max-w-3xl mx-auto py-10 px-6">
+      <h1 className="text-3xl font-semibold text-black mb-8">
         Settings
-      </Text>
+      </h1>
 
-      <Box className="bg-white border border-zinc-200 shadow-sm p-6 mb-8" style={{ borderRadius: 0 }}>
-        <Text className="font-unbounded font-bold text-xl text-zinc-900 block mb-4">
-          Budget Shield
-        </Text>
+      <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6 mb-8">
+        <p className="text-xl font-semibold text-zinc-900 mb-4">
+          Plan Usage
+        </p>
         {usageLoading ? (
-          <Text className="text-zinc-500 font-onest">Evaluating quotas...</Text>
+          <p className="text-zinc-500">Loading usage...</p>
         ) : usage ? (
-          <Box>
-            <Flex justify="between" mb="2">
-              <Text className="text-zinc-700 font-onest">
-                {usage.currentMonitors} of {usage.monitorLimit} monitors utilized
-              </Text>
-              <Text className="text-zinc-500 font-onest">
+          <div>
+            <div className="flex justify-between mb-2">
+              <span className="text-zinc-700">
+                {usage.currentMonitors} of {usage.monitorLimit} monitors used
+              </span>
+              <span className="text-zinc-500">
                 {usagePercentage.toFixed(0)}%
-              </Text>
-            </Flex>
+              </span>
+            </div>
             <Progress
               value={usagePercentage}
-              className="h-2 bg-zinc-200"
-              style={{ borderRadius: 0 }}
-              color={usagePercentage >= 100 ? "red" : "blue"}
+              indicatorClassName={usagePercentage >= 100 ? 'bg-red-500' : undefined}
             />
-          </Box>
+          </div>
         ) : null}
-      </Box>
+      </div>
 
-      <Box className="bg-white border border-zinc-200 shadow-sm p-6 mb-8" style={{ borderRadius: 0 }}>
-        <Text className="font-unbounded font-bold text-xl text-zinc-900 block mb-6">
+      <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6 mb-8">
+        <p className="text-xl font-semibold text-zinc-900 mb-6">
           Notification Routing
-        </Text>
+        </p>
 
         {settingsLoading ? (
-          <Text className="text-zinc-500 font-onest">Loading configuration...</Text>
+          <p className="text-zinc-500">Loading configuration...</p>
         ) : (
-          <Flex direction="column" gap="5">
-            <Box>
-              <Text className="text-zinc-700 font-onest block mb-2">
+          <div className="flex flex-col gap-5">
+            <div>
+              <label className="text-zinc-700 block mb-2 text-sm font-medium">
                 Discord Webhook URL
-              </Text>
-              <TextField.Root
+              </label>
+              <Input
                 placeholder="https://discord.com/api/webhooks/..."
                 value={discordWebhookUrl}
                 onChange={(e) => setDiscordWebhookUrl(e.target.value)}
-                className="font-onest bg-white border-zinc-300 text-zinc-900"
-                style={{ borderRadius: 0 }}
               />
-            </Box>
+            </div>
 
-            <Box>
-              <Text className="text-zinc-700 font-onest block mb-2">
+            <div>
+              <label className="text-zinc-700 block mb-2 text-sm font-medium">
                 Slack Webhook URL
-              </Text>
-              <TextField.Root
+              </label>
+              <Input
                 placeholder="https://hooks.slack.com/services/..."
                 value={slackWebhookUrl}
                 onChange={(e) => setSlackWebhookUrl(e.target.value)}
-                className="font-onest bg-white border-zinc-300 text-zinc-900"
-                style={{ borderRadius: 0 }}
               />
-            </Box>
+            </div>
 
-            <Flex align="center" justify="between" className="pt-4 border-t border-zinc-200">
-              <Box>
-                <Text className="text-zinc-900 font-onest block">
+            <div className="flex items-center justify-between pt-4 border-t border-zinc-200">
+              <div>
+                <p className="text-zinc-900">
                   Email Notifications
-                </Text>
-                <Text size="2" className="text-zinc-500 font-onest">
+                </p>
+                <p className="text-sm text-zinc-500">
                   Instant emails for security-grade regressions and SSL expiry.
-                </Text>
-              </Box>
+                </p>
+              </div>
               <Switch
                 checked={enableEmailNotifications}
                 onCheckedChange={setEnableEmailNotifications}
-                color="blue"
               />
-            </Flex>
+            </div>
 
-            <Flex align="center" justify="between" className="pt-4 border-t border-zinc-200">
-              <Box>
-                <Text className="text-zinc-900 font-onest block">
+            <div className="flex items-center justify-between pt-4 border-t border-zinc-200">
+              <div>
+                <p className="text-zinc-900">
                   Daily Digest Mode
-                </Text>
-                <Text size="2" className="text-zinc-500 font-onest">
+                </p>
+                <p className="text-sm text-zinc-500">
                   Batch email alerts into one daily summary instead of sending them instantly.
-                </Text>
-              </Box>
+                </p>
+              </div>
               <Switch
                 checked={digestEnabled}
                 onCheckedChange={setDigestEnabled}
-                color="blue"
               />
-            </Flex>
-          </Flex>
+            </div>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Flex justify="between" align="center">
-         <Text size="2" className="text-zinc-500 font-onest">
-           Maintained by <a href="https://iansebastian.dev" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1 transition-colors"><Rocket size={12} /> iansebastian.dev</a>
-         </Text>
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-zinc-500">
+          Maintained by <a href="https://iansebastian.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 transition-colors"><Rocket size={12} /> iansebastian.dev</a>
+        </p>
         <Button
           onClick={handleSave}
           disabled={updateSettings.isPending || settingsLoading}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-onest cursor-pointer px-6 transition-colors duration-150"
-          style={{ borderRadius: 0 }}
         >
-          {updateSettings.isPending ? 'Synchronizing...' : 'Save Configuration'}
+          {updateSettings.isPending ? 'Saving...' : 'Save Settings'}
         </Button>
-      </Flex>
-    </Box>
+      </div>
+    </div>
   );
 };

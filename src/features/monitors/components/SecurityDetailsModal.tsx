@@ -1,9 +1,18 @@
-import { Dialog, Flex, Text, Box, Code, Button } from '@radix-ui/themes';
-import { ShieldCheck, ShieldAlert, Copy } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Copy } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../../lib/axios';
 import { remediationFilename } from '../../../lib/remediation';
 import { useMemo } from 'react';
+import { GradeBadge } from './GradeBadge';
+import { HeaderChecklist } from './HeaderChecklist';
 
 export interface SecurityAuditResponse {
   hasCsp: boolean;
@@ -61,113 +70,92 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
   };
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
-      <Dialog.Content
-        className="bg-white border border-zinc-200 rounded-none font-onest"
-        style={{ borderRadius: 0 }}
-        maxWidth="600px"
-        aria-describedby={undefined}
-      >
-        <Dialog.Title className="font-unbounded font-bold text-zinc-900 mb-4">
-          Sentinel Vault
-        </Dialog.Title>
-        <Dialog.Description className="sr-only">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]" aria-describedby={undefined}>
+        <DialogTitle>Security Audit</DialogTitle>
+        <DialogDescription className="sr-only">
           Detailed security audit results
-        </Dialog.Description>
+        </DialogDescription>
 
         {isLoading && (
-          <Text className="text-zinc-500">Executing deep scan...</Text>
+          <p className="text-zinc-500">Running scan...</p>
         )}
 
         {error && (
-          <Text className="text-red-600">Failed to retrieve security audit.</Text>
+          <p className="text-red-600">Failed to retrieve security audit.</p>
         )}
 
         {!isLoading && !error && audit === null && (
-          <Flex direction="column" align="center" justify="center" className="h-48 text-zinc-500">
-            <Text size="3" className="font-medium tracking-wide block mb-2 font-onest">Awaiting Telemetry</Text>
-            <Text size="2" className="opacity-70 font-onest">The Sentinel Engine is currently profiling this target.</Text>
-          </Flex>
+          <div className="flex flex-col items-center justify-center h-48 text-zinc-500 text-center">
+            <p className="font-medium tracking-wide mb-2">Awaiting first scan</p>
+            <p className="text-sm opacity-70">This target is currently being profiled.</p>
+          </div>
         )}
 
         {audit && (
-          <Flex direction="column" gap="5">
-            <Flex align="center" justify="between" className="p-6 border border-zinc-200 bg-zinc-50">
-              <Box>
-                <Text size="2" className="text-zinc-500 block mb-1 font-onest">Current Grade</Text>
-                <Text className={`font-unbounded text-6xl font-black ${grade === 'A' ? 'text-blue-600' : 'text-black'}`}>{grade}</Text>
-              </Box>
-              <Box className="text-right">
-                <Text size="2" className="text-zinc-500 block mb-1 font-onest">SSL Integrity</Text>
-                <Text className="block text-zinc-900 font-onest">{audit.sslIssuer || 'Unknown Issuer'}</Text>
-                <Text size="2" className={`font-onest block ${daysRemaining !== null && daysRemaining < 14 ? 'text-red-600' : 'text-blue-600'}`}>
+          <div className="flex flex-col gap-5">
+            <div className="flex items-center justify-between p-6 rounded-lg border border-zinc-200 bg-zinc-50">
+              <GradeBadge grade={grade} size="xl" showLabel />
+              <div className="text-right">
+                <p className="text-sm text-zinc-500 mb-1">SSL Integrity</p>
+                <p className="text-zinc-900">{audit.sslIssuer || 'Unknown Issuer'}</p>
+                <p className={`text-sm ${daysRemaining !== null && daysRemaining < 14 ? 'text-red-600' : 'text-primary'}`}>
                   {daysRemaining === null
                     ? 'No Expiry Data'
                     : daysRemaining < 0
                       ? `Expired ${Math.abs(daysRemaining)} Days Ago`
                       : `${daysRemaining} Days Remaining`}
-                </Text>
+                </p>
                 {audit.tlsVersion && (
-                  <Text size="1" className="font-mono text-zinc-500 block mt-1">{audit.tlsVersion}</Text>
+                  <p className="text-xs font-mono text-zinc-500 mt-1">{audit.tlsVersion}</p>
                 )}
-              </Box>
-            </Flex>
+              </div>
+            </div>
 
-            <Box>
-              <Text size="3" className="font-bold text-zinc-900 mb-3 block font-onest">Defense Checklist</Text>
-              <Flex direction="column" gap="2">
-                <HeaderStatusItem label="Content-Security-Policy" isPresent={audit.hasCsp} />
-                <HeaderStatusItem label="Strict-Transport-Security" isPresent={audit.hasHsts} />
-                <HeaderStatusItem label="X-Frame-Options" isPresent={audit.hasXfo} />
-                <HeaderStatusItem label="X-Content-Type-Options" isPresent={audit.hasNosniff} />
-              </Flex>
-            </Box>
+            <div>
+              <p className="text-sm font-semibold text-zinc-900 mb-3">Header Checklist</p>
+              <HeaderChecklist
+                items={[
+                  { label: 'Content-Security-Policy', present: audit.hasCsp },
+                  { label: 'Strict-Transport-Security', present: audit.hasHsts },
+                  { label: 'X-Frame-Options', present: audit.hasXfo },
+                  { label: 'X-Content-Type-Options', present: audit.hasNosniff },
+                ]}
+              />
+            </div>
 
             {audit.remediationSnippet && (
-              <Box>
-                <Flex align="center" justify="between" className="mb-2">
-                  <Box>
-                    <Text size="3" className="font-bold text-zinc-900 block font-onest">
-                      Blueprint Generator{audit.detectedPlatform ? ` (${audit.detectedPlatform})` : ''}
-                    </Text>
-                    <Text size="1" className="font-mono text-zinc-500 block mt-0.5">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-900">
+                      Suggested Fix{audit.detectedPlatform ? ` (${audit.detectedPlatform})` : ''}
+                    </p>
+                    <p className="text-xs font-mono text-zinc-500 mt-0.5">
                       {remediationFilename(audit.detectedPlatform)}
-                    </Text>
-                  </Box>
-                  <Button variant="ghost" className="text-zinc-500 cursor-pointer font-onest" onClick={copyToClipboard}>
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={copyToClipboard} className="text-zinc-500">
                     <Copy size={16} />
                     Copy
                   </Button>
-                </Flex>
-                <Box className="bg-zinc-50 border border-zinc-200 p-4 relative">
-                  <Code variant="ghost" className="text-zinc-700 whitespace-pre overflow-x-auto block font-mono">
+                </div>
+                <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                  <pre className="text-zinc-700 whitespace-pre overflow-x-auto font-mono text-sm">
                     {audit.remediationSnippet}
-                  </Code>
-                </Box>
-              </Box>
+                  </pre>
+                </div>
+              </div>
             )}
-          </Flex>
+          </div>
         )}
 
-        <Flex gap="3" mt="5" justify="end">
-          <Dialog.Close>
-            <Button variant="soft" className="bg-zinc-100 text-zinc-900 cursor-pointer rounded-none font-onest" style={{ borderRadius: 0 }}>
-              Close
-            </Button>
-          </Dialog.Close>
-        </Flex>
-      </Dialog.Content>
-    </Dialog.Root>
+        <DialogFooter>
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
-
-const HeaderStatusItem = ({ label, isPresent }: { label: string, isPresent: boolean }) => (
-  <Flex align="center" justify="between" className="p-3 border border-zinc-200 bg-zinc-50">
-    <Text className="text-zinc-700 font-onest">{label}</Text>
-    {isPresent ? (
-      <ShieldCheck className="text-blue-600" size={20} />
-    ) : (
-      <ShieldAlert className="text-red-600" size={20} />
-    )}
-  </Flex>
-);

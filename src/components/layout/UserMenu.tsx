@@ -1,13 +1,21 @@
 // src/components/layout/UserMenu.tsx
-import { DropdownMenu, Flex, Text } from '@radix-ui/themes';
-import { User, LogOut, IdCard } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import { User, LogOut, IdCard, ChevronsUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../lib/axios';
-
-interface UserMenuProps {
-  collapsed: boolean;
-}
 
 interface UserProfileResponse {
   displayName: string;
@@ -16,8 +24,9 @@ interface UserProfileResponse {
   authProvider: string;
 }
 
-export const UserMenu = ({ collapsed }: UserMenuProps) => {
+export const UserMenu = () => {
   const navigate = useNavigate();
+  const { isMobile } = useSidebar();
 
   const { data: profile } = useQuery<UserProfileResponse>({
     queryKey: ['profile'],
@@ -34,40 +43,38 @@ export const UserMenu = ({ collapsed }: UserMenuProps) => {
   };
 
   return (
-    <div className="border-t border-zinc-200 p-3 shrink-0">
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <button className="w-full flex items-center gap-3 px-2 py-2 text-zinc-700 hover:bg-zinc-50 transition-colors cursor-pointer">
-            {profile?.avatarUrl ? (
-              <img src={profile.avatarUrl} alt={profile.displayName} className="w-7 h-7 border border-zinc-200 shrink-0" />
-            ) : (
-              <div className="w-7 h-7 flex items-center justify-center bg-zinc-100 border border-zinc-200 shrink-0">
-                <User size={16} strokeWidth={1} />
-              </div>
-            )}
-            {!collapsed && (
-              <Text className="text-sm font-medium font-onest truncate">
-                {profile?.displayName ?? 'Account'}
-              </Text>
-            )}
-          </button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content className="font-onest" style={{ borderRadius: 0 }}>
-          <DropdownMenu.Item className="cursor-pointer" onSelect={() => navigate('/account')}>
-            <Flex align="center" gap="2">
-              <IdCard size={14} strokeWidth={1} />
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              {profile?.avatarUrl ? (
+                <img src={profile.avatarUrl} alt={profile.displayName} className="size-7 rounded-full border border-zinc-200 shrink-0" />
+              ) : (
+                <div className="size-7 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 shrink-0">
+                  <User size={16} strokeWidth={1.5} />
+                </div>
+              )}
+              <span className="truncate">{profile?.displayName ?? 'Account'}</span>
+              <ChevronsUpDown className="ml-auto size-4 text-zinc-400" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side={isMobile ? 'bottom' : 'right'} align="end" className="w-56">
+            <DropdownMenuItem className="cursor-pointer gap-2" onSelect={() => navigate('/account')}>
+              <IdCard size={14} strokeWidth={1.5} />
               Identity
-            </Flex>
-          </DropdownMenu.Item>
-          <DropdownMenu.Separator />
-          <DropdownMenu.Item className="cursor-pointer" color="red" onSelect={handleLogout}>
-            <Flex align="center" gap="2">
-              <LogOut size={14} strokeWidth={1} />
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" className="cursor-pointer gap-2" onSelect={handleLogout}>
+              <LogOut size={14} strokeWidth={1.5} />
               Logout
-            </Flex>
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
-    </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 };

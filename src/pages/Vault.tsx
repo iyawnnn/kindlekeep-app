@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Flex, Text, Box, Grid, Button, Code } from '@radix-ui/themes';
+import { Button } from '@/components/ui/button';
 import { ShieldCheck, ShieldAlert, ArrowLeft, Download, Server, Lock } from 'lucide-react';
 import { api } from '../lib/axios';
 import type { SecurityAuditResponse } from '../features/monitors/types/monitor.types';
 import { remediationFilename } from '../lib/remediation';
+import { GradeBadge } from '../features/monitors/components/GradeBadge';
+import { HeaderChecklist } from '../features/monitors/components/HeaderChecklist';
 
 interface VaultAuditDetail {
   id: string;
@@ -45,17 +47,17 @@ export const Vault = () => {
 
   if (isLoading) {
     return (
-      <Flex justify="center" align="center" className="h-[calc(100vh-64px)] text-zinc-500 font-onest">
-        <Text>Decrypting Sentinel Vault...</Text>
-      </Flex>
+      <div className="flex items-center justify-center h-[calc(100vh-64px)] text-zinc-500">
+        <p>Loading Sentinel Vault...</p>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Box className="p-8 text-red-600 font-onest max-w-7xl mx-auto">
-        <Text>Failed to synchronize Sentinel Vault state.</Text>
-      </Box>
+      <div className="p-8 text-red-600 max-w-7xl mx-auto">
+        <p>Failed to load Sentinel Vault.</p>
+      </div>
     );
   }
 
@@ -64,47 +66,45 @@ export const Vault = () => {
   }
 
   return (
-    <Box className="max-w-7xl mx-auto p-8">
+    <div className="max-w-7xl mx-auto p-8">
       <header className="mb-10">
-        <h1 className="text-3xl font-black font-unbounded text-black tracking-tight">
+        <h1 className="text-3xl font-semibold text-black tracking-tight">
           Sentinel Vault
         </h1>
-        <Text className="text-zinc-600 mt-2 font-medium font-onest block">
-          Continuous Exposure Management and Protocol Audits.
-        </Text>
+        <p className="text-zinc-500 mt-2">
+          Continuous exposure management and protocol audits.
+        </p>
       </header>
 
-      <Grid columns={{ initial: '1', md: '2', lg: '3' }} gap="4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {targets?.map((target) => (
-          <Box
+          <div
             key={target.monitorId}
             onClick={() => setActiveMonitorId(target.monitorId)}
-            className="bg-white border border-zinc-200 shadow-sm hover:shadow-md p-6 cursor-pointer transition-all duration-150 hover:border-blue-300"
+            className="rounded-xl bg-white border border-zinc-200 shadow-sm hover:shadow-md p-6 cursor-pointer transition-all duration-150 hover:border-primary/40"
           >
-            <Flex justify="between" align="start" className="mb-4">
-              <Box>
-                <Text className="text-lg font-bold font-onest tracking-wide text-zinc-800 block truncate">
+            <div className="flex justify-between items-start mb-4">
+              <div className="min-w-0">
+                <p className="text-lg font-semibold text-zinc-800 truncate">
                   {target.friendlyName}
-                </Text>
-                <Text className="text-sm text-zinc-500 font-mono mt-1 block truncate">
+                </p>
+                <p className="text-sm text-zinc-500 font-mono mt-1 truncate">
                   {target.url}
-                </Text>
-              </Box>
-              <Box className={`flex items-center justify-center w-10 h-10 border ${target.securityGrade === 'A' ? 'border-blue-500/30 bg-blue-50 text-blue-600' : 'border-zinc-200 bg-zinc-50 text-zinc-500'}`}>
-                <Text className="font-unbounded font-black text-xl">{target.securityGrade}</Text>
-              </Box>
-            </Flex>
+                </p>
+              </div>
+              <GradeBadge grade={target.securityGrade} size="md" />
+            </div>
 
-            <Flex align="center" gap="2" className="text-xs text-zinc-500 font-mono">
-              <Lock size={14} strokeWidth={1} />
-              <Text>
+            <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono">
+              <Lock size={14} strokeWidth={1.5} />
+              <span>
                 {target.lastAudit ? `Last Audit: ${new Date(target.lastAudit.createdAt).toLocaleDateString()}` : 'Pending Audit'}
-              </Text>
-            </Flex>
-          </Box>
+              </span>
+            </div>
+          </div>
         ))}
-      </Grid>
-    </Box>
+      </div>
+    </div>
   );
 };
 
@@ -141,118 +141,104 @@ const VaultDetailView = ({ target, onBack }: { target: VaultTargetResponse, onBa
   };
 
   return (
-    <Box className="max-w-7xl mx-auto py-10 px-6 font-onest">
-      <Button variant="ghost" onClick={onBack} className="inline-flex items-center gap-2 text-zinc-500 hover:text-black transition-colors mb-8 cursor-pointer p-0">
-        <ArrowLeft size={16} strokeWidth={1} />
-        <Text>Return to Vault</Text>
+    <div className="max-w-7xl mx-auto py-10 px-6">
+      <Button variant="ghost" onClick={onBack} className="text-zinc-500 hover:text-black mb-8 -ml-3">
+        <ArrowLeft size={16} strokeWidth={1.5} />
+        Return to Vault
       </Button>
 
       <header className="mb-8">
-        <Flex align="center" gap="4">
-          <Box className={`flex items-center justify-center w-16 h-16 border ${target.securityGrade === 'A' ? 'border-blue-500/50 bg-blue-50 text-blue-600' : 'border-zinc-200 bg-zinc-50 text-zinc-500'}`}>
-            <Text className="font-unbounded font-black text-3xl">{target.securityGrade}</Text>
-          </Box>
-          <Box>
-            <h1 className="text-3xl font-black font-unbounded text-black tracking-tight">
+        <div className="flex items-center gap-4">
+          <GradeBadge grade={target.securityGrade} size="lg" />
+          <div>
+            <h1 className="text-3xl font-semibold text-black tracking-tight">
               {target.friendlyName}
             </h1>
-            <Text className="text-zinc-600 font-mono mt-1 block">{target.url}</Text>
-          </Box>
-        </Flex>
+            <p className="text-zinc-500 font-mono mt-1">{target.url}</p>
+          </div>
+        </div>
       </header>
 
       {!audit ? (
-        <Box className="bg-white border border-zinc-200 shadow-sm p-8 text-center text-zinc-500">
-          <Server size={32} strokeWidth={1} className="mx-auto mb-4 opacity-50" />
-          <Text>Audit data has not been generated for this target.</Text>
-        </Box>
+        <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-8 text-center text-zinc-500">
+          <Server size={32} strokeWidth={1.5} className="mx-auto mb-4 opacity-50" />
+          <p>Audit data has not been generated for this target.</p>
+        </div>
       ) : (
-        <Grid columns={{ initial: '1', lg: '2' }} gap="8">
-          <Flex direction="column" gap="8">
-            <Box className="bg-white border border-zinc-200 shadow-sm p-6 rounded-none">
-              <Flex align="center" gap="3" className="mb-6">
-                <Lock className="w-5 h-5 text-blue-500" strokeWidth={1} />
-                <Text className="text-xl font-bold font-unbounded text-zinc-900">SSL Certificate Path</Text>
-              </Flex>
-              <Grid columns="2" gap="4" className="font-mono text-sm">
-                <Box>
-                  <Text className="text-zinc-500 uppercase text-xs font-bold block mb-1">Issuer Authority</Text>
-                  <Text className="text-zinc-800">{audit.sslIssuer || 'Unknown or Self-Signed'}</Text>
-                </Box>
-                <Box>
-                  <Text className="text-zinc-500 uppercase text-xs font-bold block mb-1">Expiration Date</Text>
-                  <Text className={audit.sslExpiryAt && new Date(audit.sslExpiryAt) < new Date() ? 'text-red-600' : 'text-zinc-800'}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-8">
+            <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Lock className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                <p className="text-xl font-semibold text-zinc-900">SSL Certificate Path</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 font-mono text-sm">
+                <div>
+                  <p className="text-zinc-500 text-xs font-semibold mb-1">Issuer Authority</p>
+                  <p className="text-zinc-800">{audit.sslIssuer || 'Unknown or Self-Signed'}</p>
+                </div>
+                <div>
+                  <p className="text-zinc-500 text-xs font-semibold mb-1">Expiration Date</p>
+                  <p className={audit.sslExpiryAt && new Date(audit.sslExpiryAt) < new Date() ? 'text-red-600' : 'text-zinc-800'}>
                     {audit.sslExpiryAt ? new Date(audit.sslExpiryAt).toLocaleString() : 'N/A'}
-                  </Text>
-                </Box>
+                  </p>
+                </div>
                 {fullAudit?.tlsVersion && (
-                  <Box>
-                    <Text className="text-zinc-500 uppercase text-xs font-bold block mb-1">TLS Version</Text>
-                    <Text className="text-zinc-800">{fullAudit.tlsVersion}</Text>
-                  </Box>
+                  <div>
+                    <p className="text-zinc-500 text-xs font-semibold mb-1">TLS Version</p>
+                    <p className="text-zinc-800">{fullAudit.tlsVersion}</p>
+                  </div>
                 )}
-              </Grid>
-            </Box>
+              </div>
+            </div>
 
-            <Box className="bg-white border border-zinc-200 shadow-sm p-6 rounded-none">
-              <Flex align="center" gap="3" className="mb-6">
-                <ShieldAlert className="w-5 h-5 text-blue-500" strokeWidth={1} />
-                <Text className="text-xl font-bold font-unbounded text-zinc-900">Header Analysis</Text>
-              </Flex>
-              <Flex direction="column" gap="3">
-                <HeaderRow label="Strict-Transport-Security" present={audit.hasHsts} />
-                <HeaderRow label="Content-Security-Policy" present={audit.hasCsp} />
-                <HeaderRow label="X-Frame-Options" present={audit.hasXfo} />
-                <HeaderRow label="X-Content-Type-Options" present={audit.hasNosniff} />
-              </Flex>
-            </Box>
-          </Flex>
+            <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <ShieldAlert className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                <p className="text-xl font-semibold text-zinc-900">Header Analysis</p>
+              </div>
+              <HeaderChecklist
+                items={[
+                  { label: 'Strict-Transport-Security', present: audit.hasHsts },
+                  { label: 'Content-Security-Policy', present: audit.hasCsp },
+                  { label: 'X-Frame-Options', present: audit.hasXfo },
+                  { label: 'X-Content-Type-Options', present: audit.hasNosniff },
+                ]}
+              />
+            </div>
+          </div>
 
-          <Box>
+          <div>
             {fullAudit?.remediationSnippet ? (
-              <Box className="bg-white border border-zinc-200 shadow-sm p-6 rounded-none h-full">
-                <Flex align="center" justify="between" className="mb-6">
-                  <Box>
-                    <Text className="text-xl font-bold font-unbounded text-zinc-900 block">Actionable Intelligence</Text>
-                    <Text className="text-sm text-zinc-500 mt-1">
-                      {fullAudit.detectedPlatform ? `Recommended ${fullAudit.detectedPlatform} Configuration` : 'Recommended Configuration'}
-                    </Text>
-                  </Box>
-                  <Button
-                    onClick={handleExport}
-                    className="bg-black text-white hover:bg-zinc-800 cursor-pointer font-bold rounded-none px-4 py-2 flex items-center gap-2"
-                  >
+              <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6 h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <p className="text-xl font-semibold text-zinc-900">Suggested Fix</p>
+                    <p className="text-sm text-zinc-500 mt-1">
+                      {fullAudit.detectedPlatform ? `Recommended ${fullAudit.detectedPlatform} configuration` : 'Recommended configuration'}
+                    </p>
+                  </div>
+                  <Button onClick={handleExport} className="gap-2">
                     <Download size={16} strokeWidth={1.5} />
-                    Export Fix
+                    Export
                   </Button>
-                </Flex>
-                <Box className="bg-zinc-50 border border-zinc-200 p-4 overflow-x-auto">
-                  <Code variant="ghost" className="text-zinc-700 whitespace-pre font-mono text-sm block">
+                </div>
+                <div className="rounded-lg bg-zinc-50 border border-zinc-200 p-4 overflow-x-auto">
+                  <pre className="text-zinc-700 whitespace-pre font-mono text-sm">
                     {fullAudit.remediationSnippet}
-                  </Code>
-                </Box>
-              </Box>
+                  </pre>
+                </div>
+              </div>
             ) : (
-              <Box className="bg-white border border-zinc-200 shadow-sm p-6 rounded-none flex flex-col items-center justify-center h-full text-center">
-                <ShieldCheck size={48} strokeWidth={1} className="text-blue-500 mb-4" />
-                <Text className="text-xl font-bold font-unbounded text-zinc-900 block">Optimal Posture</Text>
-                <Text className="text-sm text-zinc-500 mt-2">All primary security headers are actively enforced.</Text>
-              </Box>
+              <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6 flex flex-col items-center justify-center h-full text-center">
+                <ShieldCheck size={48} strokeWidth={1.5} className="text-primary mb-4" />
+                <p className="text-xl font-semibold text-zinc-900">Optimal Posture</p>
+                <p className="text-sm text-zinc-500 mt-2">All primary security headers are actively enforced.</p>
+              </div>
             )}
-          </Box>
-        </Grid>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
-
-const HeaderRow = ({ label, present }: { label: string; present: boolean }) => (
-  <Flex align="center" justify="between" className="p-3 bg-zinc-50 border border-zinc-200">
-    <Text className="text-zinc-700 font-mono text-sm">{label}</Text>
-    {present ? (
-      <ShieldCheck className="text-blue-500" size={18} strokeWidth={1.5} />
-    ) : (
-      <ShieldAlert className="text-red-600" size={18} strokeWidth={1.5} />
-    )}
-  </Flex>
-);

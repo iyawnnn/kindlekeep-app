@@ -1,6 +1,6 @@
 // src/features/account/components/ExportDataButton.tsx
 import { useState } from 'react';
-import { Button } from '@radix-ui/themes';
+import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { api } from '../../../lib/axios';
 import { useToastStore } from '../../../components/ui/useToastStore';
@@ -29,15 +29,8 @@ export const ExportDataButton = () => {
   };
 
   return (
-    <Button
-      variant="outline"
-      color="gray"
-      disabled={isExporting}
-      onClick={handleExport}
-      className="cursor-pointer font-onest"
-      style={{ borderRadius: 0 }}
-    >
-      <Download size={14} strokeWidth={1} />
+    <Button variant="outline" disabled={isExporting} onClick={handleExport}>
+      <Download size={14} strokeWidth={1.5} />
       {isExporting ? 'Preparing export...' : 'Export my data'}
     </Button>
   );

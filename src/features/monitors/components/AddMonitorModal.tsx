@@ -1,7 +1,18 @@
 // src/features/monitors/components/AddMonitorModal.tsx
 import { useState } from 'react';
 import axios from 'axios';
-import { Dialog, Button, TextField, Text, Flex } from '@radix-ui/themes';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Plus, Loader2 } from 'lucide-react';
 import { useMonitorStore } from '../store/useMonitorStore';
 
@@ -41,11 +52,11 @@ export const AddMonitorModal = () => {
       const response = await axios.post(
         `${API_BASE_URL}/api/monitors`,
         { url, friendlyName },
-        { 
-          headers: { 
+        {
+          headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
-          } 
+          }
         }
       );
 
@@ -56,92 +67,64 @@ export const AddMonitorModal = () => {
     } catch (err) {
       console.error('Failed to create monitor payload:', err);
       const detail = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
-      setError(detail || 'Failed to deploy monitor. Verify the endpoint and try again.');
+      setError(detail || 'Failed to add monitor. Verify the endpoint and try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Dialog.Trigger>
-        <Button 
-          size="3" 
-          color="blue" 
-          variant="solid" 
-          className="cursor-pointer font-mono uppercase tracking-widest text-xs"
-        >
-          <Plus strokeWidth={1} className="w-4 h-4 mr-2" />
-          Add Target
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button size="lg">
+          <Plus className="w-4 h-4" />
+          Add monitor
         </Button>
-      </Dialog.Trigger>
+      </DialogTrigger>
 
-      <Dialog.Content
-        className="bg-white border border-zinc-200 !rounded-none"
-        style={{ maxWidth: 450 }}
-      >
-        <Dialog.Title className="font-heading font-black text-xl text-zinc-900 mb-2">
-          Deploy Target
-        </Dialog.Title>
-        <Dialog.Description className="font-sans text-zinc-500 text-sm mb-6">
-          Register a new endpoint for high-frequency telemetry and security audits.
-        </Dialog.Description>
+      <DialogContent className="sm:max-w-[450px]">
+        <DialogHeader>
+          <DialogTitle>Add monitor</DialogTitle>
+          <DialogDescription>
+            Register a new endpoint for uptime and security auditing.
+          </DialogDescription>
+        </DialogHeader>
 
-        <Flex direction="column" gap="4">
-          <label>
-            <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
-              Target URL
-            </Text>
-            <TextField.Root 
-              size="3"
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="add-monitor-url">Target URL</Label>
+            <Input
+              id="add-monitor-url"
               placeholder="https://api.example.com/health"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="font-mono text-sm"
-              variant="surface"
-              color="gray"
             />
-          </label>
+          </div>
 
-          <label>
-            <Text as="div" size="2" mb="2" className="font-sans text-zinc-700 font-bold text-xs uppercase tracking-widest">
-              Friendly Name
-            </Text>
-            <TextField.Root 
-              size="3"
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="add-monitor-name">Friendly Name</Label>
+            <Input
+              id="add-monitor-name"
               placeholder="Production Gateway"
               value={friendlyName}
               onChange={(e) => setFriendlyName(e.target.value)}
-              className="font-sans text-sm"
-              variant="surface"
-              color="gray"
             />
-          </label>
+          </div>
 
-          {error && (
-            <Text color="red" size="2" className="font-sans text-sm mt-2">
-              {error}
-            </Text>
-          )}
-        </Flex>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+        </div>
 
-        <Flex gap="3" mt="6" justify="end">
-          <Dialog.Close>
-            <Button variant="outline" color="gray" className="cursor-pointer font-mono">
-              Cancel
-            </Button>
-          </Dialog.Close>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isLoading}
-            color="blue"
-            className="cursor-pointer font-mono"
-          >
-            {isLoading ? <Loader2 strokeWidth={1} className="w-4 h-4 animate-spin mr-2" /> : null}
-            {isLoading ? 'Deploying...' : 'Initialize'}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
+            Cancel
           </Button>
-        </Flex>
-      </Dialog.Content>
-    </Dialog.Root>
+          <Button onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {isLoading ? 'Adding...' : 'Add monitor'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

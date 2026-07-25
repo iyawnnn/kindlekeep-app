@@ -1,6 +1,15 @@
 // src/features/dev/components/CreateApiKeyDialog.tsx
 import { useState } from 'react';
-import { Dialog, Button, TextField, Text, Flex, Box, Code } from '@radix-ui/themes';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Copy, Check, Plus } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../../lib/axios';
@@ -51,67 +60,56 @@ export const CreateApiKeyDialog = () => {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
-      <Dialog.Trigger>
-        <Button className="bg-blue-500 hover:bg-blue-600 text-white font-onest cursor-pointer" style={{ borderRadius: 0 }}>
-          <Plus size={14} strokeWidth={1} />
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <Plus size={14} strokeWidth={1.5} />
           New key
         </Button>
-      </Dialog.Trigger>
-      <Dialog.Content className="bg-white border border-zinc-200 font-onest" style={{ borderRadius: 0 }} maxWidth="450px" aria-describedby={undefined}>
-        <Dialog.Title className="text-zinc-900 font-unbounded font-bold">
-          {createdKey ? 'Key Created' : 'New API Key'}
-        </Dialog.Title>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[450px]" aria-describedby={undefined}>
+        <DialogTitle>{createdKey ? 'Key Created' : 'New API Key'}</DialogTitle>
 
         {!createdKey ? (
-          <Flex direction="column" gap="4" className="mt-2">
-            <Box>
-              <Text size="2" className="text-zinc-700 font-onest block mb-2">Label</Text>
-              <TextField.Root
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="api-key-label">Label</Label>
+              <Input
+                id="api-key-label"
                 placeholder="e.g. CI pipeline"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-                className="font-onest bg-white border-zinc-300 text-zinc-900"
-                style={{ borderRadius: 0 }}
               />
-            </Box>
-            <Flex gap="3" justify="end">
-              <Dialog.Close>
-                <Button variant="soft" className="bg-zinc-100 text-zinc-900 font-onest cursor-pointer" style={{ borderRadius: 0 }}>
-                  Cancel
-                </Button>
-              </Dialog.Close>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
               <Button
                 disabled={!label.trim() || createKey.isPending}
                 onClick={() => createKey.mutate()}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-onest cursor-pointer"
-                style={{ borderRadius: 0 }}
               >
                 {createKey.isPending ? 'Creating...' : 'Create'}
               </Button>
-            </Flex>
-          </Flex>
+            </DialogFooter>
+          </div>
         ) : (
-          <Flex direction="column" gap="4" className="mt-2">
-            <Text size="2" className="text-red-600 font-onest">
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-red-600">
               Copy this now — you won't be able to see it again.
-            </Text>
-            <Box className="bg-zinc-50 border border-zinc-200 p-3 flex items-center justify-between gap-3">
-              <Code variant="ghost" className="text-zinc-700 font-mono text-sm break-all">{createdKey.rawKey}</Code>
-              <Button variant="ghost" className="cursor-pointer text-zinc-500 shrink-0" onClick={copyKey}>
+            </p>
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-zinc-50 border border-zinc-200 p-3">
+              <code className="text-zinc-700 font-mono text-sm break-all">{createdKey.rawKey}</code>
+              <Button variant="ghost" size="icon" className="shrink-0 text-zinc-500" onClick={copyKey}>
                 {copied ? <Check size={16} /> : <Copy size={16} />}
               </Button>
-            </Box>
-            <Flex justify="end">
-              <Dialog.Close>
-                <Button className="bg-black text-white font-onest cursor-pointer" style={{ borderRadius: 0 }}>
-                  Done
-                </Button>
-              </Dialog.Close>
-            </Flex>
-          </Flex>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setOpen(false)}>Done</Button>
+            </DialogFooter>
+          </div>
         )}
-      </Dialog.Content>
-    </Dialog.Root>
+      </DialogContent>
+    </Dialog>
   );
 };

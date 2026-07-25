@@ -1,6 +1,5 @@
 // src/pages/Badges.tsx
 import { useQueries, useQuery } from '@tanstack/react-query';
-import { Box, Flex, Text, Grid } from '@radix-ui/themes';
 import { api } from '../lib/axios';
 import type { MonitorDetailResponse } from '../features/monitors/types/monitor.types';
 import type { MonitorResponse } from '../features/monitors/store/useMonitorStore';
@@ -34,35 +33,35 @@ export const Badges = () => {
 
   if (isLoading) {
     return (
-      <Flex justify="center" align="center" className="h-[calc(100vh-64px)] text-zinc-500 font-onest">
-        <Text>Loading badges...</Text>
-      </Flex>
+      <div className="flex items-center justify-center h-[calc(100vh-64px)] text-zinc-500">
+        <p>Loading badges...</p>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Box className="p-8 text-red-600 font-onest max-w-7xl mx-auto">
-        <Text>Failed to load monitors.</Text>
-      </Box>
+      <div className="p-8 text-red-600 max-w-7xl mx-auto">
+        <p>Failed to load monitors.</p>
+      </div>
     );
   }
 
   return (
-    <Box className="max-w-7xl mx-auto p-8">
+    <div className="max-w-7xl mx-auto p-8">
       <header className="mb-10">
-        <h1 className="text-3xl font-black font-unbounded text-black tracking-tight">Badges</h1>
-        <Text className="text-zinc-600 mt-2 font-medium font-onest block">
+        <h1 className="text-3xl font-semibold text-black tracking-tight">Badges</h1>
+        <p className="text-zinc-500 mt-2">
           Embeddable status badges for your READMEs and docs.
-        </Text>
+        </p>
       </header>
 
       {monitors && monitors.length === 0 ? (
-        <Box className="py-12 flex flex-col items-center justify-center text-zinc-500 border border-dashed border-zinc-300 bg-zinc-50">
-          <Text className="uppercase tracking-widest text-sm font-onest">No Active Targets</Text>
-        </Box>
+        <div className="py-12 flex flex-col items-center justify-center text-zinc-500 rounded-xl border border-dashed border-zinc-300 bg-zinc-50">
+          <p className="text-sm font-medium">No monitors yet</p>
+        </div>
       ) : (
-        <Grid columns={{ initial: '1', md: '2', lg: '3' }} gap="4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {monitors?.map((monitor, i) => {
             const detail = detailQueries[i]?.data;
             return (
@@ -76,8 +75,8 @@ export const Badges = () => {
               />
             );
           })}
-        </Grid>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };

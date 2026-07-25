@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { Flex, Text, Box, Grid } from '@radix-ui/themes';
 import { AlertCircle, Clock, CheckCircle2, Activity } from 'lucide-react';
 import { api } from '../lib/axios';
 
@@ -28,97 +27,95 @@ export const Incidents = () => {
 
   if (isLoading) {
     return (
-      <Flex justify="center" align="center" className="h-[calc(100vh-64px)] text-zinc-500 font-onest">
-        <Text>Loading telemetry data...</Text>
-      </Flex>
+      <div className="flex items-center justify-center h-[calc(100vh-64px)] text-zinc-500">
+        <p>Loading incidents...</p>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Box className="p-8 text-red-600 font-onest max-w-7xl mx-auto">
-        <Text>Failed to synchronize incident state.</Text>
-      </Box>
+      <div className="p-8 text-red-600 max-w-7xl mx-auto">
+        <p>Failed to load incidents.</p>
+      </div>
     );
   }
 
   return (
-    <Box className="max-w-7xl mx-auto p-8">
+    <div className="max-w-7xl mx-auto p-8">
       <header className="mb-10">
-        <h1 className="text-3xl font-black font-unbounded text-black tracking-tight">
-          Incident Command Center
+        <h1 className="text-3xl font-semibold text-black tracking-tight">
+          Incidents
         </h1>
-        <Text className="text-zinc-600 mt-2 font-medium font-onest block">
-          Root cause analysis and temporal telemetry.
-        </Text>
+        <p className="text-zinc-500 mt-2">
+          Root cause analysis and incident history.
+        </p>
       </header>
 
-      <Flex direction="column" gap="4">
+      <div className="flex flex-col gap-4">
         {incidents?.map((incident) => (
-          <Box
+          <div
             key={incident.id}
-            className="bg-white border border-zinc-200 shadow-sm p-6 transition-colors duration-200 hover:bg-zinc-50"
+            className="rounded-xl bg-white border border-zinc-200 shadow-sm p-6 transition-colors duration-200 hover:bg-zinc-50"
           >
-            <Flex align="start" justify="between" className="mb-6">
-              <Flex align="center" gap="3">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
                 {incident.isResolved ? (
-                  <CheckCircle2 className="w-5 h-5 text-blue-500" strokeWidth={1} />
+                  <CheckCircle2 className="w-5 h-5 text-primary" strokeWidth={1.5} />
                 ) : (
-                  <AlertCircle className="w-5 h-5 text-red-500" strokeWidth={1} />
+                  <AlertCircle className="w-5 h-5 text-red-500" strokeWidth={1.5} />
                 )}
-                <Box>
-                  <Text className="text-lg font-bold font-onest tracking-wide text-zinc-800 block">
+                <div>
+                  <p className="text-lg font-semibold text-zinc-800">
                     {incident.friendlyName}
-                  </Text>
-                  <Text className="text-sm text-zinc-500 font-onest mt-1">
+                  </p>
+                  <p className="text-sm text-zinc-500 mt-1">
                     Fingerprint: <span className="font-mono text-zinc-600">{incident.incidentHash.substring(0, 8)}</span>
-                  </Text>
-                </Box>
-              </Flex>
-              <Box>
-                <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider font-onest ${incident.isResolved ? 'text-blue-700 bg-blue-50' : 'text-red-700 bg-red-50'}`}>
-                  {incident.incidentType}
+                  </p>
+                </div>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${incident.isResolved ? 'text-accent-foreground bg-accent' : 'text-red-700 bg-red-50'}`}>
+                {incident.incidentType}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-zinc-200">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-zinc-500 font-semibold flex items-center gap-2">
+                  <Clock className="w-3 h-3" strokeWidth={1.5} /> Start Time
                 </span>
-              </Box>
-            </Flex>
-
-            <Grid columns={{ initial: '1', md: '3' }} gap="6" className="pt-4 border-t border-zinc-200">
-              <Flex direction="column" gap="1">
-                <Text className="text-xs text-zinc-500 uppercase font-bold flex items-center gap-2 font-onest">
-                  <Clock className="w-3 h-3" strokeWidth={1} /> Start Time
-                </Text>
-                <Text className="text-xl font-medium text-zinc-900 font-onest">
+                <span className="text-xl font-medium text-zinc-900">
                   {new Date(incident.startTime).toLocaleString()}
-                </Text>
-              </Flex>
+                </span>
+              </div>
 
-              <Flex direction="column" gap="1">
-                <Text className="text-xs text-zinc-500 uppercase font-bold flex items-center gap-2 font-onest">
-                  <CheckCircle2 className="w-3 h-3" strokeWidth={1} /> Resolution Status
-                </Text>
-                <Text className={`text-xl font-medium font-onest ${incident.resolvedAt ? 'text-zinc-900' : 'text-red-600'}`}>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-zinc-500 font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="w-3 h-3" strokeWidth={1.5} /> Resolution Status
+                </span>
+                <span className={`text-xl font-medium ${incident.resolvedAt ? 'text-zinc-900' : 'text-red-600'}`}>
                   {incident.resolvedAt ? new Date(incident.resolvedAt).toLocaleString() : 'Ongoing'}
-                </Text>
-              </Flex>
+                </span>
+              </div>
 
-              <Flex direction="column" gap="1">
-                <Text className="text-xs text-zinc-500 uppercase font-bold flex items-center gap-2 font-onest">
-                  <Activity className="w-3 h-3" strokeWidth={1} /> Occurrences
-                </Text>
-                <Text className="text-xl font-medium text-zinc-900 font-onest">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-zinc-500 font-semibold flex items-center gap-2">
+                  <Activity className="w-3 h-3" strokeWidth={1.5} /> Occurrences
+                </span>
+                <span className="text-xl font-medium text-zinc-900">
                   {incident.occurrenceCount}
-                </Text>
-              </Flex>
-            </Grid>
-          </Box>
+                </span>
+              </div>
+            </div>
+          </div>
         ))}
 
         {incidents?.length === 0 && (
-          <Box className="text-center p-12 bg-white border border-zinc-200">
-            <Text className="text-zinc-500 font-onest">No active or historical incidents recorded.</Text>
-          </Box>
+          <div className="text-center p-12 rounded-xl bg-white border border-zinc-200">
+            <p className="text-zinc-500">No active or historical incidents recorded.</p>
+          </div>
         )}
-      </Flex>
-    </Box>
+      </div>
+    </div>
   );
 };

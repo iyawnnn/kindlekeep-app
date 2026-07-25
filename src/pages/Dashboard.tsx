@@ -43,18 +43,18 @@ export const Dashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-white p-8 text-zinc-900 font-sans">
+    <div className="min-h-screen bg-white p-8 text-zinc-900">
       <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="font-heading text-3xl font-black tracking-tight text-zinc-900">Command Center</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">Dashboard</h1>
           {monitors.length > 0 && (
             <div className="flex items-center gap-2 mt-2">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              <p className="font-mono text-sm text-zinc-500">
-                <span className="text-blue-600 font-bold">{healthyCount}</span> of {monitors.length} monitors healthy
+              <p className="text-sm text-zinc-500">
+                <span className="text-primary font-semibold">{healthyCount}</span> of {monitors.length} monitors healthy
               </p>
             </div>
           )}
@@ -63,12 +63,12 @@ export const Dashboard = () => {
       </header>
 
       {loadError && monitors.length === 0 ? (
-        <div className="py-12 flex flex-col items-center justify-center border border-dashed border-red-300 bg-red-50">
-          <p className="font-sans uppercase tracking-widest text-sm text-red-600">Telemetry Unavailable</p>
-          <p className="text-xs font-mono mt-2 text-red-700/70">Could not reach the command server.</p>
+        <div className="py-12 flex flex-col items-center justify-center rounded-xl border border-dashed border-red-300 bg-red-50">
+          <p className="text-sm font-medium text-red-600">Unable to load monitors</p>
+          <p className="text-xs mt-2 text-red-700/70">Could not reach the API server.</p>
           <button
             onClick={fetchMonitors}
-            className="mt-6 py-2 px-6 bg-black text-white hover:bg-zinc-800 font-bold uppercase tracking-wide text-xs transition-colors rounded-none font-onest"
+            className="mt-6 py-2 px-6 bg-zinc-900 text-white hover:bg-zinc-800 font-medium text-sm rounded-lg transition-colors"
           >
             Retry
           </button>
@@ -82,9 +82,9 @@ export const Dashboard = () => {
             <MonitorCard key={monitor.id} monitor={monitor} />
           ))}
           {monitors.length === 0 && (
-            <div className="col-span-full py-12 flex flex-col items-center justify-center text-zinc-500 border border-dashed border-zinc-300 bg-zinc-50">
-              <p className="font-sans uppercase tracking-widest text-sm">No Active Targets</p>
-              <p className="text-xs font-mono mt-2">Deploy a monitor to commence telemetry.</p>
+            <div className="col-span-full py-12 flex flex-col items-center justify-center text-zinc-500 rounded-xl border border-dashed border-zinc-300 bg-zinc-50">
+              <p className="text-sm font-medium text-zinc-700">No monitors yet</p>
+              <p className="text-xs mt-2">Add a monitor to start tracking uptime and security.</p>
             </div>
           )}
         </motion.div>

@@ -21,17 +21,17 @@ export const Toaster = () => {
               exit={{ opacity: 0, x: 24 }}
               transition={spring}
               onClick={() => remove(toast.id)}
-              className={`flex items-start gap-3 border px-4 py-3 rounded-none cursor-pointer shadow-md font-onest ${
+              className={`flex items-start gap-3 border px-4 py-3 rounded-lg cursor-pointer shadow-md ${
                 isError ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'
               }`}
             >
               {isError ? (
-                <AlertTriangle strokeWidth={1} className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
+                <AlertTriangle strokeWidth={1.5} className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
               ) : (
-                <CheckCircle2 strokeWidth={1} className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
+                <CheckCircle2 strokeWidth={1.5} className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
               )}
               <span className="flex-1 text-sm text-zinc-900 leading-snug">{toast.message}</span>
-              <X strokeWidth={1} className="w-4 h-4 text-zinc-500 shrink-0" />
+              <X strokeWidth={1.5} className="w-4 h-4 text-zinc-500 shrink-0" />
             </motion.div>
           );
         })}
