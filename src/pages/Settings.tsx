@@ -12,11 +12,15 @@ interface UserUsageResponse {
 interface UserSettingsResponse {
   discordWebhookUrl: string | null;
   enableEmailNotifications: boolean;
+  slackWebhookUrl: string | null;
+  digestEnabled: boolean;
 }
 
 interface UpdateSettingsRequest {
   discordWebhookUrl: string;
   enableEmailNotifications: boolean;
+  slackWebhookUrl: string;
+  digestEnabled: boolean;
 }
 
 export const Settings = () => {
@@ -24,6 +28,8 @@ export const Settings = () => {
   
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState('');
   const [enableEmailNotifications, setEnableEmailNotifications] = useState(true);
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
+  const [digestEnabled, setDigestEnabled] = useState(false);
 
   const { data: usage, isLoading: usageLoading } = useQuery<UserUsageResponse>({
     queryKey: ['userUsage'],
@@ -47,6 +53,8 @@ export const Settings = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDiscordWebhookUrl(settings.discordWebhookUrl || '');
       setEnableEmailNotifications(settings.enableEmailNotifications);
+      setSlackWebhookUrl(settings.slackWebhookUrl || '');
+      setDigestEnabled(settings.digestEnabled);
     }
   }, [settings]);
 
@@ -62,7 +70,9 @@ export const Settings = () => {
   const handleSave = () => {
     updateSettings.mutate({
       discordWebhookUrl,
-      enableEmailNotifications
+      enableEmailNotifications,
+      slackWebhookUrl,
+      digestEnabled
     });
   };
 
@@ -71,7 +81,7 @@ export const Settings = () => {
   return (
     <Box className="max-w-3xl mx-auto py-10 px-6 font-onest">
       <Text className="font-unbounded font-bold text-3xl text-black block mb-8">
-        Identity Hub
+        Settings
       </Text>
 
       <Box className="bg-white border border-zinc-200 shadow-sm p-6 mb-8" style={{ borderRadius: 0 }}>
@@ -122,18 +132,47 @@ export const Settings = () => {
               />
             </Box>
 
+            <Box>
+              <Text className="text-zinc-700 font-onest block mb-2">
+                Slack Webhook URL
+              </Text>
+              <TextField.Root
+                placeholder="https://hooks.slack.com/services/..."
+                value={slackWebhookUrl}
+                onChange={(e) => setSlackWebhookUrl(e.target.value)}
+                className="font-onest bg-white border-zinc-300 text-zinc-900"
+                style={{ borderRadius: 0 }}
+              />
+            </Box>
+
             <Flex align="center" justify="between" className="pt-4 border-t border-zinc-200">
               <Box>
                 <Text className="text-zinc-900 font-onest block">
-                  Resend Daily Digest
+                  Email Notifications
                 </Text>
                 <Text size="2" className="text-zinc-500 font-onest">
-                  Receive critical infrastructure updates via email.
+                  Instant emails for security-grade regressions and SSL expiry.
                 </Text>
               </Box>
               <Switch
                 checked={enableEmailNotifications}
                 onCheckedChange={setEnableEmailNotifications}
+                color="blue"
+              />
+            </Flex>
+
+            <Flex align="center" justify="between" className="pt-4 border-t border-zinc-200">
+              <Box>
+                <Text className="text-zinc-900 font-onest block">
+                  Daily Digest Mode
+                </Text>
+                <Text size="2" className="text-zinc-500 font-onest">
+                  Batch email alerts into one daily summary instead of sending them instantly.
+                </Text>
+              </Box>
+              <Switch
+                checked={digestEnabled}
+                onCheckedChange={setDigestEnabled}
                 color="blue"
               />
             </Flex>

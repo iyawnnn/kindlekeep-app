@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Flex, Text, Box, Grid, Button, Code } from '@radix-ui/themes';
 import { ShieldCheck, ShieldAlert, ArrowLeft, Download, Server, Lock } from 'lucide-react';
 import { api } from '../lib/axios';
+import type { SecurityAuditResponse } from '../features/monitors/types/monitor.types';
+import { remediationFilename } from '../lib/remediation';
 
 interface VaultAuditDetail {
   id: string;
@@ -107,35 +109,31 @@ export const Vault = () => {
 };
 
 const VaultDetailView = ({ target, onBack }: { target: VaultTargetResponse, onBack: () => void }) => {
+  // The Vault list endpoint only returns header flags + SSL issuer/expiry (VaultAuditDetail).
+  // The full audit (platform detection + real remediation snippet + TLS version) lives at the
+  // per-monitor endpoint, same one SecurityDetailsModal already uses correctly.
+  const { data: fullAudit } = useQuery<SecurityAuditResponse | null>({
+    queryKey: ['securityAudit', target.monitorId],
+    queryFn: async () => {
+      try {
+        const response = await api.get(`/api/monitors/${target.monitorId}/audit`);
+        return response.data;
+      } catch (err) {
+        if ((err as { response?: { status?: number } }).response?.status === 404) return null;
+        throw err;
+      }
+    },
+  });
+
   const audit = target.lastAudit;
 
-  const missingHeaders = useMemo(() => {
-    if (!audit) return [];
-    const headers = [];
-    if (!audit.hasCsp) headers.push({ key: 'Content-Security-Policy', value: "default-src 'self'" });
-    if (!audit.hasHsts) headers.push({ key: 'Strict-Transport-Security', value: "max-age=63072000; includeSubDomains; preload" });
-    if (!audit.hasXfo) headers.push({ key: 'X-Frame-Options', value: "DENY" });
-    if (!audit.hasNosniff) headers.push({ key: 'X-Content-Type-Options', value: "nosniff" });
-    return headers;
-  }, [audit]);
-
-  const remediationConfig = useMemo(() => {
-    if (missingHeaders.length === 0) return null;
-    return JSON.stringify({
-      headers: [{
-        source: "/(.*)",
-        headers: missingHeaders.map(h => ({ key: h.key, value: h.value }))
-      }]
-    }, null, 2);
-  }, [missingHeaders]);
-
   const handleExport = () => {
-    if (!remediationConfig) return;
-    const blob = new Blob([remediationConfig], { type: 'application/json' });
+    if (!fullAudit?.remediationSnippet) return;
+    const blob = new Blob([fullAudit.remediationSnippet], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'vercel.json';
+    a.download = remediationFilename(fullAudit.detectedPlatform);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -187,6 +185,12 @@ const VaultDetailView = ({ target, onBack }: { target: VaultTargetResponse, onBa
                     {audit.sslExpiryAt ? new Date(audit.sslExpiryAt).toLocaleString() : 'N/A'}
                   </Text>
                 </Box>
+                {fullAudit?.tlsVersion && (
+                  <Box>
+                    <Text className="text-zinc-500 uppercase text-xs font-bold block mb-1">TLS Version</Text>
+                    <Text className="text-zinc-800">{fullAudit.tlsVersion}</Text>
+                  </Box>
+                )}
               </Grid>
             </Box>
 
@@ -205,12 +209,14 @@ const VaultDetailView = ({ target, onBack }: { target: VaultTargetResponse, onBa
           </Flex>
 
           <Box>
-            {remediationConfig ? (
+            {fullAudit?.remediationSnippet ? (
               <Box className="bg-white border border-zinc-200 shadow-sm p-6 rounded-none h-full">
                 <Flex align="center" justify="between" className="mb-6">
                   <Box>
                     <Text className="text-xl font-bold font-unbounded text-zinc-900 block">Actionable Intelligence</Text>
-                    <Text className="text-sm text-zinc-500 mt-1">Recommended Vercel Configuration</Text>
+                    <Text className="text-sm text-zinc-500 mt-1">
+                      {fullAudit.detectedPlatform ? `Recommended ${fullAudit.detectedPlatform} Configuration` : 'Recommended Configuration'}
+                    </Text>
                   </Box>
                   <Button
                     onClick={handleExport}
@@ -222,7 +228,7 @@ const VaultDetailView = ({ target, onBack }: { target: VaultTargetResponse, onBa
                 </Flex>
                 <Box className="bg-zinc-50 border border-zinc-200 p-4 overflow-x-auto">
                   <Code variant="ghost" className="text-zinc-700 whitespace-pre font-mono text-sm block">
-                    {remediationConfig}
+                    {fullAudit.remediationSnippet}
                   </Code>
                 </Box>
               </Box>

@@ -2,6 +2,7 @@ import { Dialog, Flex, Text, Box, Code, Button } from '@radix-ui/themes';
 import { ShieldCheck, ShieldAlert, Copy } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../../lib/axios';
+import { remediationFilename } from '../../../lib/remediation';
 import { useMemo } from 'react';
 
 export interface SecurityAuditResponse {
@@ -13,6 +14,8 @@ export interface SecurityAuditResponse {
   sslExpiryAt: string | null;
   rawHeaders: string | null;
   tlsVersion: string | null;
+  detectedPlatform: string | null;
+  remediationSnippet: string | null;
 }
 
 interface SecurityDetailsModalProps {
@@ -44,21 +47,6 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
     }
   });
 
-  // Grade is the authoritative value computed by the backend (headers + TLS + cert), passed in as a
-  // prop. Here we only derive which headers are missing, to drive the remediation blueprint below.
-  const missingHeaders = useMemo(() => {
-    if (!audit) return [];
-
-    const headers = [
-      { key: 'Content-Security-Policy', value: "default-src 'self'", present: audit.hasCsp },
-      { key: 'Strict-Transport-Security', value: "max-age=63072000; includeSubDomains; preload", present: audit.hasHsts },
-      { key: 'X-Frame-Options', value: "DENY", present: audit.hasXfo },
-      { key: 'X-Content-Type-Options', value: "nosniff", present: audit.hasNosniff }
-    ];
-
-    return headers.filter(h => !h.present);
-  }, [audit]);
-
   const daysRemaining = useMemo(() => {
     if (!audit?.sslExpiryAt) return null;
     // Signed: negative means the certificate has already expired (do not use Math.abs here).
@@ -66,21 +54,9 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
     return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
   }, [audit]);
 
-  const blueprintJson = useMemo(() => {
-    if (missingHeaders.length === 0) return '';
-    return JSON.stringify({
-      headers: [
-        {
-          source: "/(.*)",
-          headers: missingHeaders.map(h => ({ key: h.key, value: h.value }))
-        }
-      ]
-    }, null, 2);
-  }, [missingHeaders]);
-
   const copyToClipboard = async () => {
-    if (blueprintJson) {
-      await navigator.clipboard.writeText(blueprintJson);
+    if (audit?.remediationSnippet) {
+      await navigator.clipboard.writeText(audit.remediationSnippet);
     }
   };
 
@@ -147,10 +123,17 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
               </Flex>
             </Box>
 
-            {missingHeaders.length > 0 && (
+            {audit.remediationSnippet && (
               <Box>
                 <Flex align="center" justify="between" className="mb-2">
-                  <Text size="3" className="font-bold text-zinc-900 block font-onest">Blueprint Generator (vercel.json)</Text>
+                  <Box>
+                    <Text size="3" className="font-bold text-zinc-900 block font-onest">
+                      Blueprint Generator{audit.detectedPlatform ? ` (${audit.detectedPlatform})` : ''}
+                    </Text>
+                    <Text size="1" className="font-mono text-zinc-500 block mt-0.5">
+                      {remediationFilename(audit.detectedPlatform)}
+                    </Text>
+                  </Box>
                   <Button variant="ghost" className="text-zinc-500 cursor-pointer font-onest" onClick={copyToClipboard}>
                     <Copy size={16} />
                     Copy
@@ -158,7 +141,7 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
                 </Flex>
                 <Box className="bg-zinc-50 border border-zinc-200 p-4 relative">
                   <Code variant="ghost" className="text-zinc-700 whitespace-pre overflow-x-auto block font-mono">
-                    {blueprintJson}
+                    {audit.remediationSnippet}
                   </Code>
                 </Box>
               </Box>
