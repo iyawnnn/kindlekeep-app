@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { UptimeTimeline } from '@/components/ui/UptimeTimeline';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Copy, Activity, Pencil, Check } from 'lucide-react';
@@ -8,7 +8,6 @@ import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { api } from '../lib/axios';
-import { UptimeStatus } from '../features/monitors/store/useMonitorStore';
 import type { SecurityAuditResponse, UptimeLogResponse, MonitorDetailResponse, PublicStatusResponse } from '../features/monitors/types/monitor.types';
 import { useSignalR } from '../features/monitors/hooks/useSignalR';
 import { useToastStore } from '../components/ui/useToastStore';
@@ -133,12 +132,6 @@ export const MonitorDetail = () => {
     };
   }, []);
 
-  const paddedHistory = useMemo(() => {
-    if (!history) return Array(144).fill(null);
-    const padding = Array(Math.max(0, 144 - history.length)).fill(null);
-    return [...padding, ...history];
-  }, [history]);
-
   const latestLog = history && history.length > 0 ? history[history.length - 1] : null;
 
   const dtaMetrics = useMemo(() => {
@@ -205,7 +198,9 @@ export const MonitorDetail = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-2xl font-semibold text-zinc-900">{monitor.friendlyName}</p>
-              <p className="font-mono text-sm text-zinc-500">{monitor.url}</p>
+              <p className="font-mono text-sm text-zinc-500">
+                {monitor.monitorType === 1 ? `Journey · ${monitor.steps?.length ?? 0} steps` : monitor.url}
+              </p>
             </div>
             <Button variant="outline" onClick={() => setIsEditOpen(true)}>
               <Pencil size={14} strokeWidth={1.5} /> Edit
@@ -247,37 +242,8 @@ export const MonitorDetail = () => {
         {historyLoading ? (
           <p className="text-zinc-500">Loading history...</p>
         ) : (
-          <div className="flex gap-1 w-full h-16 items-end">
-            {paddedHistory.map((log, index) => {
-              let colorClass = 'bg-zinc-200';
-              if (log) {
-                if (log.status === UptimeStatus.Healthy) colorClass = 'bg-primary';
-                else if (log.status === UptimeStatus.Degraded) colorClass = 'bg-amber-500';
-                else if (log.status === UptimeStatus.Down) colorClass = 'bg-red-500';
-              }
-
-              const tooltipContent = log
-                ? `${new Date(log.timestamp).toLocaleString()} - ${log.latencyMs}ms`
-                : 'No data';
-
-              return (
-                <Tooltip key={index}>
-                  <TooltipTrigger asChild>
-                    <div
-                      className={`flex-1 rounded-sm ${colorClass} hover:opacity-80 transition-opacity cursor-crosshair`}
-                      style={{ height: log ? `${Math.max(10, Math.min(100, (log.latencyMs / 1000) * 100))}%` : '10%' }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent className="font-mono">{tooltipContent}</TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </div>
+          <UptimeTimeline history={history ?? []} />
         )}
-        <div className="flex justify-between mt-3">
-          <span className="text-sm text-zinc-500 font-mono">24 hours ago</span>
-          <span className="text-sm text-zinc-500 font-mono">Now</span>
-        </div>
       </div>
 
       {dtaMetrics && (

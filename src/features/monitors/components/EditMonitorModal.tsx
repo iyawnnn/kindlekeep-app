@@ -16,7 +16,8 @@ import { Loader2, Plus, X } from 'lucide-react';
 import { api } from '../../../lib/axios';
 import { useMonitorStore } from '../store/useMonitorStore';
 import { useToastStore } from '../../../components/ui/useToastStore';
-import type { MonitorDetailResponse, UpdateMonitorRequest } from '../types/monitor.types';
+import { MonitorType, type JourneyStep, type MonitorDetailResponse, type UpdateMonitorRequest } from '../types/monitor.types';
+import { JourneyStepBuilder } from './JourneyStepBuilder';
 
 interface EditMonitorModalProps {
   monitorId: string;
@@ -75,6 +76,8 @@ const EditMonitorForm = ({ monitor, monitorId, onOpenChange }: EditMonitorFormPr
   const queryClient = useQueryClient();
   const { updateMonitorInList } = useMonitorStore();
 
+  const isJourney = monitor.monitorType === MonitorType.Journey;
+
   const [url, setUrl] = useState(monitor.url);
   const [friendlyName, setFriendlyName] = useState(monitor.friendlyName);
   const [intervalMinutes, setIntervalMinutes] = useState(monitor.intervalMinutes);
@@ -84,6 +87,7 @@ const EditMonitorForm = ({ monitor, monitorId, onOpenChange }: EditMonitorFormPr
       ? Object.entries(monitor.requestHeaders).map(([key, value]) => ({ key, value }))
       : []
   );
+  const [steps, setSteps] = useState<JourneyStep[]>(monitor.steps ?? []);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -95,14 +99,21 @@ const EditMonitorForm = ({ monitor, monitorId, onOpenChange }: EditMonitorFormPr
       return;
     }
 
-    try {
-      const parsedUrl = new URL(url);
-      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-        throw new Error('Invalid protocol');
+    if (isJourney) {
+      if (steps.length === 0 || !steps[0].url.trim()) {
+        setError('At least one step with a URL is required.');
+        return;
       }
-    } catch {
-      setError('Please enter a valid HTTP or HTTPS URL.');
-      return;
+    } else {
+      try {
+        const parsedUrl = new URL(url);
+        if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+          throw new Error('Invalid protocol');
+        }
+      } catch {
+        setError('Please enter a valid HTTP or HTTPS URL.');
+        return;
+      }
     }
 
     setIsSaving(true);
@@ -113,11 +124,13 @@ const EditMonitorForm = ({ monitor, monitorId, onOpenChange }: EditMonitorFormPr
     }, {});
 
     const body: UpdateMonitorRequest = {
-      url,
+      url: isJourney ? null : url,
       friendlyName,
       intervalMinutes,
       requestTimeout,
       requestHeaders: Object.keys(requestHeaders).length > 0 ? requestHeaders : null,
+      monitorType: monitor.monitorType,
+      steps: isJourney ? steps : null,
     };
 
     try {
@@ -146,16 +159,6 @@ const EditMonitorForm = ({ monitor, monitorId, onOpenChange }: EditMonitorFormPr
   return (
     <>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-monitor-url">Target URL</Label>
-          <Input
-            id="edit-monitor-url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="font-mono text-sm"
-          />
-        </div>
-
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-monitor-name">Friendly Name</Label>
           <Input
@@ -191,35 +194,51 @@ const EditMonitorForm = ({ monitor, monitorId, onOpenChange }: EditMonitorFormPr
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <Label>Custom Headers</Label>
-            <Button size="sm" variant="ghost" onClick={addHeaderRow} className="cursor-pointer">
-              <Plus size={14} /> Add
-            </Button>
-          </div>
-          <div className="flex flex-col gap-2">
-            {headers.map((h, i) => (
-              <div key={i} className="flex gap-2 items-center">
-                <Input
-                  placeholder="Authorization"
-                  value={h.key}
-                  onChange={(e) => updateHeaderRow(i, 'key', e.target.value)}
-                  className="font-mono text-xs flex-1"
-                />
-                <Input
-                  placeholder="Bearer ..."
-                  value={h.value}
-                  onChange={(e) => updateHeaderRow(i, 'value', e.target.value)}
-                  className="font-mono text-xs flex-1"
-                />
-                <button onClick={() => removeHeaderRow(i)} className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer">
-                  <X size={16} />
-                </button>
+        {isJourney ? (
+          <JourneyStepBuilder steps={steps} onChange={setSteps} />
+        ) : (
+          <>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-monitor-url">Target URL</Label>
+              <Input
+                id="edit-monitor-url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="font-mono text-sm"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Custom Headers</Label>
+                <Button size="sm" variant="ghost" onClick={addHeaderRow} className="cursor-pointer">
+                  <Plus size={14} /> Add
+                </Button>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="flex flex-col gap-2">
+                {headers.map((h, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <Input
+                      placeholder="Authorization"
+                      value={h.key}
+                      onChange={(e) => updateHeaderRow(i, 'key', e.target.value)}
+                      className="font-mono text-xs flex-1"
+                    />
+                    <Input
+                      placeholder="Bearer ..."
+                      value={h.value}
+                      onChange={(e) => updateHeaderRow(i, 'value', e.target.value)}
+                      className="font-mono text-xs flex-1"
+                    />
+                    <button onClick={() => removeHeaderRow(i)} className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer">
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>

@@ -14,6 +14,9 @@ import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { PublicStatus } from './pages/PublicStatus';
+import { PublicStatusHub } from './pages/PublicStatusHub';
+import { StatusPages } from './pages/StatusPages';
+import { StatusPageEditor } from './pages/StatusPageEditor';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('jwt_token');
@@ -48,10 +51,13 @@ export const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/status/:slug" element={<PublicStatus />} />
+        <Route path="/hub/:slug" element={<PublicStatusHub />} />
         <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/monitor/:id" element={<MonitorDetail />} />
           <Route path="/incidents" element={<Incidents />} />
+          <Route path="/status-pages" element={<StatusPages />} />
+          <Route path="/status-pages/:id" element={<StatusPageEditor />} />
           <Route path="/vault" element={<Vault />} />
           <Route path="/badges" element={<Badges />} />
           <Route path="/settings" element={<Settings />} />

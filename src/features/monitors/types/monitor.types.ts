@@ -11,10 +11,34 @@ export interface SecurityAuditResponse {
   remediationSnippet: string | null;
 }
 
+export interface CopilotResponse {
+  explanation: string | null;
+  detectedPlatform: string | null;
+  remediationSnippet: string | null;
+}
+
 export interface UptimeLogResponse {
   timestamp: string;
   status: number;
   latencyMs: number;
+}
+
+export enum MonitorType {
+  Http = 0,
+  Journey = 1,
+}
+
+export interface JourneyStep {
+  stepOrder: number;
+  method: string;
+  url: string;
+  headers: Record<string, string> | null;
+  body: string | null;
+  captureAs: string | null;
+  captureJsonPath: string | null;
+  assertJsonPath: string | null;
+  assertEquals: string | null;
+  expectedStatusCode: number | null;
 }
 
 export interface MonitorDetailResponse {
@@ -29,14 +53,25 @@ export interface MonitorDetailResponse {
   isActive: boolean;
   isPublic: boolean;
   publicSlug: string | null;
+  monitorType: MonitorType;
+  steps: JourneyStep[] | null;
+}
+
+export interface CreateMonitorRequest {
+  url: string | null;
+  friendlyName: string;
+  monitorType: MonitorType;
+  steps: JourneyStep[] | null;
 }
 
 export interface UpdateMonitorRequest {
-  url: string;
+  url: string | null;
   friendlyName: string;
   intervalMinutes: number;
   requestTimeout: number;
   requestHeaders: Record<string, string> | null;
+  monitorType: MonitorType;
+  steps: JourneyStep[] | null;
 }
 
 export interface PublicStatusResponse {

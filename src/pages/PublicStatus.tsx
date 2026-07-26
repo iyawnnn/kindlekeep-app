@@ -1,9 +1,8 @@
 // src/pages/PublicStatus.tsx
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { UptimeTimeline } from '@/components/ui/UptimeTimeline';
 import { Globe } from 'lucide-react';
-import { useMemo } from 'react';
 import { api } from '../lib/axios';
 import { UptimeStatus } from '../features/monitors/store/useMonitorStore';
 import type { PublicMonitorResponse } from '../features/monitors/types/monitor.types';
@@ -20,12 +19,6 @@ export const PublicStatus = () => {
     enabled: !!slug,
     refetchInterval: 60000,
   });
-
-  const paddedHistory = useMemo(() => {
-    if (!monitor?.history) return Array(144).fill(null);
-    const padding = Array(Math.max(0, 144 - monitor.history.length)).fill(null);
-    return [...padding, ...monitor.history];
-  }, [monitor]);
 
   if (isLoading) {
     return (
@@ -65,31 +58,7 @@ export const PublicStatus = () => {
 
         <div className="rounded-xl bg-white border border-zinc-200 p-8">
           <p className="text-lg font-semibold text-zinc-900 mb-6">Uptime History</p>
-          <div className="flex gap-1 w-full h-16 items-end">
-            {paddedHistory.map((log, index) => {
-              let colorClass = 'bg-zinc-200';
-              if (log) {
-                colorClass = log.status === UptimeStatus.Healthy ? 'bg-primary' : 'bg-red-500';
-              }
-
-              const tooltipContent = log
-                ? `${new Date(log.timestamp).toLocaleString()} - ${log.latencyMs}ms`
-                : 'No data';
-
-              return (
-                <Tooltip key={index}>
-                  <TooltipTrigger asChild>
-                    <div className={`flex-1 rounded-sm ${colorClass}`} style={{ height: '100%' }} />
-                  </TooltipTrigger>
-                  <TooltipContent className="font-mono">{tooltipContent}</TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </div>
-          <div className="flex justify-between mt-3">
-            <span className="text-sm text-zinc-500 font-mono">24 hours ago</span>
-            <span className="text-sm text-zinc-500 font-mono">Now</span>
-          </div>
+          <UptimeTimeline history={monitor.history} />
         </div>
       </div>
     </div>

@@ -107,7 +107,7 @@ export const MonitorCard = ({ monitor }: MonitorCardProps) => {
           </div>
 
           <p className="text-xs text-zinc-500 font-mono mb-6 truncate">
-            {monitor.url}
+            {monitor.monitorType === 1 ? 'Journey monitor' : monitor.url}
           </p>
 
           <div className="flex items-center justify-between mt-auto">

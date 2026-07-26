@@ -17,6 +17,7 @@ interface UserSettingsResponse {
   enableEmailNotifications: boolean;
   slackWebhookUrl: string | null;
   digestEnabled: boolean;
+  escalationDelayMinutes: number;
 }
 
 interface UpdateSettingsRequest {
@@ -24,6 +25,7 @@ interface UpdateSettingsRequest {
   enableEmailNotifications: boolean;
   slackWebhookUrl: string;
   digestEnabled: boolean;
+  escalationDelayMinutes: number;
 }
 
 export const Settings = () => {
@@ -33,6 +35,7 @@ export const Settings = () => {
   const [enableEmailNotifications, setEnableEmailNotifications] = useState(true);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
   const [digestEnabled, setDigestEnabled] = useState(false);
+  const [escalationDelayMinutes, setEscalationDelayMinutes] = useState(10);
 
   const { data: usage, isLoading: usageLoading } = useQuery<UserUsageResponse>({
     queryKey: ['userUsage'],
@@ -58,6 +61,7 @@ export const Settings = () => {
       setEnableEmailNotifications(settings.enableEmailNotifications);
       setSlackWebhookUrl(settings.slackWebhookUrl || '');
       setDigestEnabled(settings.digestEnabled);
+      setEscalationDelayMinutes(settings.escalationDelayMinutes);
     }
   }, [settings]);
 
@@ -75,7 +79,8 @@ export const Settings = () => {
       discordWebhookUrl,
       enableEmailNotifications,
       slackWebhookUrl,
-      digestEnabled
+      digestEnabled,
+      escalationDelayMinutes
     });
   };
 
@@ -169,6 +174,22 @@ export const Settings = () => {
               <Switch
                 checked={digestEnabled}
                 onCheckedChange={setDigestEnabled}
+              />
+            </div>
+
+            <div className="pt-4 border-t border-zinc-200">
+              <label className="text-zinc-700 block mb-2 text-sm font-medium">
+                Escalate to Email After (minutes)
+              </label>
+              <p className="text-sm text-zinc-500 mb-2">
+                If a Down incident isn't acknowledged in this many minutes, an email alert fires as a backup to Discord/Slack.
+              </p>
+              <Input
+                type="number"
+                min={1}
+                className="max-w-32"
+                value={escalationDelayMinutes}
+                onChange={(e) => setEscalationDelayMinutes(Number(e.target.value))}
               />
             </div>
           </div>

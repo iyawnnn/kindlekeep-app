@@ -1,18 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, Clock, CheckCircle2, Activity } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AlertCircle, Clock, CheckCircle2, Activity, Mail } from 'lucide-react';
 import { api } from '../lib/axios';
-
-interface IncidentResponse {
-  id: string;
-  monitorId: string;
-  friendlyName: string;
-  incidentHash: string;
-  incidentType: string;
-  isResolved: boolean;
-  startTime: string;
-  resolvedAt: string | null;
-  occurrenceCount: number;
-}
+import { Button } from '@/components/ui/button';
+import { useToastStore } from '../components/ui/useToastStore';
+import type { IncidentResponse, AcknowledgeResponse } from '../features/incidents/types/incident.types';
 
 const fetchIncidents = async (): Promise<IncidentResponse[]> => {
   const response = await api.get('/api/incidents');
@@ -20,9 +11,24 @@ const fetchIncidents = async (): Promise<IncidentResponse[]> => {
 };
 
 export const Incidents = () => {
+  const queryClient = useQueryClient();
+
   const { data: incidents, isLoading, isError } = useQuery({
     queryKey: ['incidents'],
     queryFn: fetchIncidents,
+  });
+
+  const acknowledge = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post<AcknowledgeResponse>(`/api/incidents/${id}/acknowledge`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['incidents'] });
+    },
+    onError: () => {
+      useToastStore.getState().error('Failed to acknowledge incident.');
+    },
   });
 
   if (isLoading) {
@@ -74,9 +80,26 @@ export const Incidents = () => {
                   </p>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${incident.isResolved ? 'text-accent-foreground bg-accent' : 'text-red-700 bg-red-50'}`}>
-                {incident.incidentType}
-              </span>
+
+              <div className="flex items-center gap-2">
+                {incident.escalatedAt && (
+                  <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-amber-700 bg-amber-50">
+                    <Mail className="w-3 h-3" strokeWidth={1.5} />
+                    Escalated via email
+                  </span>
+                )}
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    incident.isResolved
+                      ? 'text-accent-foreground bg-accent'
+                      : incident.acknowledgedAt
+                        ? 'text-zinc-600 bg-zinc-100'
+                        : 'text-red-700 bg-red-50'
+                  }`}
+                >
+                  {incident.isResolved ? incident.incidentType : incident.acknowledgedAt ? 'Acknowledged' : incident.incidentType}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-zinc-200">
@@ -96,6 +119,11 @@ export const Incidents = () => {
                 <span className={`text-xl font-medium ${incident.resolvedAt ? 'text-zinc-900' : 'text-red-600'}`}>
                   {incident.resolvedAt ? new Date(incident.resolvedAt).toLocaleString() : 'Ongoing'}
                 </span>
+                {incident.mttrMinutes !== null && (
+                  <span className="text-xs text-zinc-500 font-mono">
+                    {Math.round(incident.mttrMinutes)} min to resolve
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col gap-1">
@@ -107,6 +135,19 @@ export const Incidents = () => {
                 </span>
               </div>
             </div>
+
+            {!incident.isResolved && !incident.acknowledgedAt && (
+              <div className="flex justify-end mt-4 pt-4 border-t border-zinc-200">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={acknowledge.isPending}
+                  onClick={() => acknowledge.mutate(incident.id)}
+                >
+                  {acknowledge.isPending ? 'Acknowledging...' : 'Acknowledge'}
+                </Button>
+              </div>
+            )}
           </div>
         ))}
 

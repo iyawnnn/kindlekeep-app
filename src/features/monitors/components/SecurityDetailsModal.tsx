@@ -6,11 +6,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Copy, Sparkles } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '../../../lib/axios';
 import { remediationFilename } from '../../../lib/remediation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { GradeBadge } from './GradeBadge';
 import { HeaderChecklist } from './HeaderChecklist';
 
@@ -23,6 +23,12 @@ export interface SecurityAuditResponse {
   sslExpiryAt: string | null;
   rawHeaders: string | null;
   tlsVersion: string | null;
+  detectedPlatform: string | null;
+  remediationSnippet: string | null;
+}
+
+interface CopilotResponse {
+  explanation: string | null;
   detectedPlatform: string | null;
   remediationSnippet: string | null;
 }
@@ -69,6 +75,16 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
     }
   };
 
+  const [copilotError, setCopilotError] = useState(false);
+  const copilotMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.get<CopilotResponse>(`/api/monitors/${monitorId}/copilot`);
+      return response.data;
+    },
+    onMutate: () => setCopilotError(false),
+    onError: () => setCopilotError(true),
+  });
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]" aria-describedby={undefined}>
@@ -93,7 +109,7 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
         )}
 
         {audit && (
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5 min-w-0">
             <div className="flex items-center justify-between p-6 rounded-lg border border-zinc-200 bg-zinc-50">
               <GradeBadge grade={grade} size="xl" showLabel />
               <div className="text-right">
@@ -124,8 +140,37 @@ export const SecurityDetailsModal = ({ monitorId, grade, isOpen, onOpenChange }:
               />
             </div>
 
-            {audit.remediationSnippet && (
-              <div>
+            {audit.remediationSnippet && grade !== 'A' && (
+              <div className="min-w-0">
+                {!copilotMutation.data?.explanation && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => copilotMutation.mutate()}
+                    disabled={copilotMutation.isPending}
+                    className="mb-3"
+                  >
+                    <Sparkles size={16} />
+                    {copilotMutation.isPending ? 'Asking Copilot...' : 'Ask Copilot'}
+                  </Button>
+                )}
+
+                {copilotError && (
+                  <p className="text-xs text-red-600 mb-3">Copilot is busy, try again shortly.</p>
+                )}
+
+                {copilotMutation.isSuccess && !copilotMutation.data?.explanation && (
+                  <p className="text-xs text-zinc-500 mb-3">
+                    Copilot couldn't generate an explanation right now — the snippet below still works.
+                  </p>
+                )}
+
+                {copilotMutation.data?.explanation && (
+                  <p className="text-sm text-zinc-700 leading-relaxed mb-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                    {copilotMutation.data.explanation}
+                  </p>
+                )}
+
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <p className="text-sm font-semibold text-zinc-900">

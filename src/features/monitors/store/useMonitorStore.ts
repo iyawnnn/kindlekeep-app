@@ -18,6 +18,7 @@ export interface MonitorResponse {
   currentSecurityGrade: string;
   isActive: boolean;
   latencyMs?: number;
+  monitorType?: number;
 }
 
 interface MonitorStore {

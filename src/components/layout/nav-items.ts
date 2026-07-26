@@ -7,6 +7,7 @@ import {
   Settings as SettingsIcon,
   IdCard,
   Terminal,
+  Radio,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { to: '/incidents', label: 'Incidents', icon: ShieldAlert },
+      { to: '/status-pages', label: 'Status Pages', icon: Radio },
     ],
   },
   {
